@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Enum Types ---
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  DONE
+  CANCELED
+  NO_SHOW
+}
+
+enum StaffStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// --- Models ---
+
+model Tenant {
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  timezone         String   @default("UTC")
+  slotStep         Int      @default(30) // em minutos (slot de agenda)
+  
+  // Configurações do mini site (JSON para flexibilidade inicial)
+  websiteConfig    Json?    // { heroTitle, heroSubtitle, aboutText, contactWhatsapp, showPrices }
+  theme            Json?    // { colors: { primary, secondary }, logoUrl, bannerUrl, borderRadius, layoutPreset }
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  locations        Location[]
+  staff            Staff[]
+  services         Service[]
+  customers        Customer[]
+  appointments     Appointment[]
+  blocks           Block[]
+
+  @@index([slug])
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  name      String
+  active    Boolean  @default(true)
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  staff     Staff[]
+  appointments Appointment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Staff {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  status    StaffStatus @default(ACTIVE)
+  
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  
+  locationId String?
+  location   Location? @relation(fields: [locationId], references: [id])
+
+  services     StaffService[]
+  appointments Appointment[]
+  blocks       Block[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([locationId])
+}
+
+model Service {
+  id           String   @id @default(cuid())
+  name         String
+  category     String?  // Ex: "Lash", "Sobrancelha"
+  duration     Int      // Minutos
+  price        Decimal  @db.Decimal(10, 2)
+  bufferBefore Int      @default(0)
+  bufferAfter  Int      @default(0)
+  active       Boolean  @default(true)
+  isFeatured   Boolean  @default(false)
+
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+
+  staff        StaffService[]
+  appointments Appointment[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+// Tabela dinâmica para definir quais profissionais fazem quais serviços
+model StaffService {
+  staffId   String
+  serviceId String
+  duration  Int?    // Opcional: sobrescreve a duração padrão do serviço para este profissional
+  price     Decimal? @db.Decimal(10, 2) // Opcional: preço específico
+
+  staff     Staff    @relation(fields: [staffId], references: [id])
+  service   Service  @relation(fields: [serviceId], references: [id])
+
+  @@id([staffId, serviceId])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String   // Prioritário conforme requisitos
+  email     String?
+  noShows   Int      @default(0)
+  tags      String[] // Tags simples (array de strings)
+
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  appointments Appointment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([phone])
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  startTime   DateTime          // UTC conforme requisitos
+  endTime     DateTime          // UTC conforme requisitos
+  status      AppointmentStatus @default(SCHEDULED)
+  notes       String?
+
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  
+  locationId  String
+  location    Location @relation(fields: [locationId], references: [id])
+  
+  staffId     String
+  staff       Staff    @relation(fields: [staffId], references: [id])
+  
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([staffId, startTime])
+  @@index([customerId])
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  startTime DateTime
+  endTime   DateTime
+  reason    String?
+
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  
+  staffId   String
+  staff     Staff    @relation(fields: [staffId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([staffId])
+}
