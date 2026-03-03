@@ -1,39 +1,90 @@
-import Link from 'next/link';
+"use client";
+import Link from "next/link";
+import { useState } from "react";
+
+const navSections = [
+    {
+        title: "Operacao",
+        items: [
+            { href: "/crm/dashboard", label: "Agenda" },
+            { href: "/crm/customers", label: "Clientes" },
+            { href: "/crm/services", label: "Servicos" },
+            { href: "/crm/staff", label: "Profissionais" },
+        ],
+    },
+    {
+        title: "Gestao",
+        items: [
+            { href: "/crm/finance", label: "Financeiro", disabled: true },
+        ],
+    },
+    {
+        title: "Configuracoes",
+        items: [
+            { href: "/crm/website", label: "Meu Site" },
+            { href: "/crm/settings", label: "Configuracoes" },
+        ],
+    },
+];
 
 export default function CRMLayout({ children }) {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
     return (
-        <div className="flex min-h-screen bg-zinc-50">
-            {/* Sidebar */}
-            <aside className="w-64 bg-white border-r border-zinc-200 flex flex-col fixed inset-y-0">
-                <div className="p-6 border-b border-zinc-100">
-                    <h1 className="text-xl font-black">Agenda <span className="text-indigo-600">Pro</span></h1>
+        <div className="min-h-screen bg-zinc-50">
+            <header className="lg:hidden fixed top-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-b border-zinc-200">
+                <div className="h-16 px-4 flex items-center justify-between">
+                    <h1 className="text-lg font-black">
+                        Agenda <span className="text-indigo-600">Pro</span>
+                    </h1>
+                    <button
+                        type="button"
+                        aria-label="Abrir menu"
+                        onClick={() => setIsMenuOpen((prev) => !prev)}
+                        className="p-2 rounded-lg border border-zinc-200 text-zinc-600"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            {isMenuOpen && (
+                <button
+                    type="button"
+                    aria-label="Fechar menu"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="lg:hidden fixed inset-0 z-30 bg-black/30"
+                />
+            )}
+
+            <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-zinc-200 flex flex-col transform transition-transform duration-200 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}>
+                <div className="h-16 lg:h-auto p-6 border-b border-zinc-100 flex items-center">
+                    <h1 className="text-xl font-black">
+                        Agenda <span className="text-indigo-600">Pro</span>
+                    </h1>
                 </div>
 
-                <nav className="flex-1 p-4 space-y-8 mt-4">
-                    <div>
-                        <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest px-4 mb-4">Operação</h3>
-                        <ul className="space-y-1">
-                            <li><Link href="/crm/dashboard" className="block px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg">Agenda</Link></li>
-                            <li><Link href="/crm/customers" className="block px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg">Clientes</Link></li>
-                            <li><Link href="/crm/services" className="block px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg">Serviços</Link></li>
-                            <li><Link href="/crm/staff" className="block px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg">Profissionais</Link></li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest px-4 mb-4">Gestão</h3>
-                        <ul className="space-y-1">
-                            <li><Link href="/crm/finance" className="block px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg opacity-50 cursor-not-allowed">Financeiro</Link></li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest px-4 mb-4">Configurações</h3>
-                        <ul className="space-y-1">
-                            <li><Link href="/crm/website" className="block px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg">Meu Site</Link></li>
-                            <li><Link href="/crm/settings" className="block px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg">Configurações</Link></li>
-                        </ul>
-                    </div>
+                <nav className="flex-1 p-4 space-y-8 mt-4 overflow-y-auto">
+                    {navSections.map((section) => (
+                        <div key={section.title}>
+                            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest px-4 mb-4">{section.title}</h3>
+                            <ul className="space-y-1">
+                                {section.items.map((item) => (
+                                    <li key={item.href}>
+                                        <Link
+                                            href={item.href}
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className={`block px-4 py-2 text-sm font-medium rounded-lg ${item.disabled ? "text-zinc-400 bg-zinc-50 cursor-not-allowed pointer-events-none" : "text-zinc-700 hover:bg-zinc-100"}`}
+                                        >
+                                            {item.label}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
                 </nav>
 
                 <div className="p-4 border-t border-zinc-100">
@@ -41,10 +92,7 @@ export default function CRMLayout({ children }) {
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <main className="flex-1 ml-64 p-10">
-                {children}
-            </main>
+            <main className="lg:ml-64 p-6 lg:p-10 pt-24 lg:pt-10">{children}</main>
         </div>
     );
 }
