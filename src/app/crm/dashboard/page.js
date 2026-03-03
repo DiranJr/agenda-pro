@@ -1,44 +1,80 @@
 "use client";
-import { useEffect, useState } from 'react';
-import { DateTime } from 'luxon';
+import { useEffect, useState } from "react";
+import { DateTime } from "luxon";
 
 export default function DashboardPage() {
     const [date, setDate] = useState(DateTime.now().toISODate());
     const [appointments, setAppointments] = useState([]);
     const [staffList, setStaffList] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     useEffect(() => {
-        // Carregar profissionais primeiro para o cabeçalho da agenda
-        fetch('/api/crm/staff')
-            .then(res => res.json())
-            .then(data => setStaffList(Array.isArray(data) ? data : []));
+        const controller = new AbortController();
+
+        async function loadStaff() {
+            try {
+                const res = await fetch("/api/crm/staff", { signal: controller.signal });
+                if (!res.ok) throw new Error("Falha ao carregar profissionais");
+                const data = await res.json();
+                setStaffList(Array.isArray(data) ? data : []);
+            } catch (err) {
+                if (err.name !== "AbortError") {
+                    setError("Nao foi possivel carregar os profissionais.");
+                }
+            }
+        }
+
+        loadStaff();
+        return () => controller.abort();
     }, []);
 
     useEffect(() => {
-        setLoading(true);
-        fetch(`/api/crm/appointments?date=${date}`)
-            .then(res => res.json())
-            .then(data => {
+        const controller = new AbortController();
+
+        async function loadAppointments() {
+            setLoading(true);
+            setError("");
+            try {
+                const res = await fetch(`/api/crm/appointments?date=${date}`, { signal: controller.signal });
+                if (!res.ok) throw new Error("Falha ao carregar agendamentos");
+                const data = await res.json();
                 setAppointments(Array.isArray(data) ? data : []);
-                setLoading(false);
-            });
+            } catch (err) {
+                if (err.name !== "AbortError") {
+                    setError("Nao foi possivel carregar os agendamentos para esta data.");
+                    setAppointments([]);
+                }
+            } finally {
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        loadAppointments();
+        return () => controller.abort();
     }, [date]);
 
     const statusColors = {
-        SCHEDULED: 'bg-blue-50 text-blue-700 border-blue-100',
-        CONFIRMED: 'bg-indigo-50 text-indigo-700 border-indigo-100',
-        DONE: 'bg-green-50 text-green-700 border-green-100',
-        CANCELED: 'bg-red-50 text-red-700 border-red-100',
-        NO_SHOW: 'bg-zinc-50 text-zinc-700 border-zinc-100',
+        SCHEDULED: "bg-blue-50 text-blue-700 border-blue-100",
+        CONFIRMED: "bg-indigo-50 text-indigo-700 border-indigo-100",
+        DONE: "bg-green-50 text-green-700 border-green-100",
+        CANCELED: "bg-red-50 text-red-700 border-red-100",
+        NO_SHOW: "bg-zinc-50 text-zinc-700 border-zinc-100",
     };
 
     return (
         <div className="h-full flex flex-col">
-            <div className="flex justify-between items-center mb-10">
+            <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center mb-10">
                 <div>
                     <h1 className="text-3xl font-black mb-2">Agenda</h1>
-                    <p className="text-zinc-500">Hoje é {DateTime.fromISO(date).setLocale('pt-BR').toLocaleString(DateTime.DATE_HUGE)}</p>
+                    <p className="text-zinc-500">
+                        Hoje e {DateTime.fromISO(date).setLocale("pt-BR").toLocaleString(DateTime.DATE_HUGE)}
+                    </p>
+                    {staffList.length > 0 && (
+                        <p className="text-xs text-zinc-400 mt-2">{staffList.length} profissional(is) disponivel(is)</p>
+                    )}
                 </div>
                 <div className="flex gap-3">
                     <input
@@ -47,12 +83,19 @@ export default function DashboardPage() {
                         onChange={(e) => setDate(e.target.value)}
                         className="bg-white border border-zinc-200 px-4 py-3 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-black/5"
                     />
-                    <button className="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity">Novo Agendamento</button>
+                    <button className="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity">
+                        Novo Agendamento
+                    </button>
                 </div>
             </div>
 
-            {/* Grid da Agenda (Simplificado por enquanto) */}
             <div className="flex-1 overflow-auto bg-white border border-zinc-200 rounded-3xl shadow-sm p-8">
+                {error && (
+                    <div className="mb-6 border border-red-200 bg-red-50 text-red-700 rounded-xl px-4 py-3 text-sm font-medium">
+                        {error}
+                    </div>
+                )}
+
                 {loading ? (
                     <div className="flex items-center justify-center h-64 text-zinc-400 font-medium">Carregando agendamentos...</div>
                 ) : appointments.length === 0 ? (
@@ -66,11 +109,11 @@ export default function DashboardPage() {
                     </div>
                 ) : (
                     <div className="grid gap-4">
-                        {appointments.map(app => (
+                        {appointments.map((app) => (
                             <div key={app.id} className="flex items-center p-6 border border-zinc-100 rounded-2xl hover:border-zinc-200 hover:shadow-sm transition-all group">
                                 <div className="w-24 border-r border-zinc-50 mr-6 pr-6">
-                                    <div className="text-lg font-black">{DateTime.fromISO(app.startTime).toFormat('HH:mm')}</div>
-                                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Início</div>
+                                    <div className="text-lg font-black">{DateTime.fromISO(app.startTime).toFormat("HH:mm")}</div>
+                                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Inicio</div>
                                 </div>
 
                                 <div className="flex-1">
@@ -92,11 +135,11 @@ export default function DashboardPage() {
                                 </div>
 
                                 <div className="flex flex-col items-end gap-2">
-                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-widest ${statusColors[app.status]}`}>
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-widest ${statusColors[app.status] || statusColors.SCHEDULED}`}>
                                         {app.status}
                                     </span>
                                     <div className="text-xs font-bold text-zinc-400">
-                                        Fim: {DateTime.fromISO(app.endTime).toFormat('HH:mm')}
+                                        Fim: {DateTime.fromISO(app.endTime).toFormat("HH:mm")}
                                     </div>
                                 </div>
                             </div>
