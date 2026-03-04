@@ -26,11 +26,61 @@ import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 
 const TEMPLATES = [
-    { id: 'modern', name: 'Moderno', desc: 'Minimalista e focado em alta resolução.', color: 'bg-zinc-900' },
-    { id: 'glass', name: 'Glassmorphism', desc: 'Efeito de vidro e cores suaves.', color: 'bg-indigo-500' },
-    { id: 'minimal', name: 'Minimal', desc: 'Foco total no conteúdo e agendamento.', color: 'bg-white border border-zinc-200' },
-    { id: 'elegant', name: 'Elegante', desc: 'Tipografia serifada e tons terrosos.', color: 'bg-stone-800' },
-    { id: 'dark', name: 'Dark Mode', desc: 'Visual escuro com contrastes vibrantes.', color: 'bg-black' },
+    {
+        id: 'modern',
+        name: 'Moderno',
+        desc: 'Fundo escuro premium com acentos em índigo.',
+        bg: 'bg-zinc-950',
+        card: 'bg-white/5 border-white/10',
+        dot: 'bg-indigo-500',
+        text: 'text-white',
+        sub: 'text-zinc-500',
+        accent: 'bg-indigo-600',
+    },
+    {
+        id: 'glass',
+        name: 'Glassmorphism',
+        desc: 'Efeito vidro e gradiente suave em roxo/rosa.',
+        bg: 'bg-gradient-to-br from-indigo-200 via-purple-100 to-pink-100',
+        card: 'bg-white/50 border-white/60 backdrop-blur',
+        dot: 'bg-indigo-500',
+        text: 'text-zinc-900',
+        sub: 'text-zinc-500',
+        accent: 'bg-indigo-600',
+    },
+    {
+        id: 'minimal',
+        name: 'Minimal',
+        desc: 'Branco puro. Foco no conteúdo.',
+        bg: 'bg-white',
+        card: 'bg-white border-zinc-200',
+        dot: 'bg-zinc-900',
+        text: 'text-zinc-900',
+        sub: 'text-zinc-400',
+        accent: 'bg-zinc-900',
+    },
+    {
+        id: 'elegant',
+        name: 'Elegante',
+        desc: 'Tons terrosos e tipografia sofisticada.',
+        bg: 'bg-[#F8F4EF]',
+        card: 'bg-white border-stone-200',
+        dot: 'bg-amber-500',
+        text: 'text-stone-900',
+        sub: 'text-stone-400',
+        accent: 'bg-stone-800',
+    },
+    {
+        id: 'dark',
+        name: 'Dark Mode',
+        desc: 'Preto absoluto com gradiente neon.',
+        bg: 'bg-black',
+        card: 'bg-zinc-900 border-zinc-800',
+        dot: 'bg-violet-500',
+        text: 'text-white',
+        sub: 'text-zinc-600',
+        accent: 'bg-gradient-to-r from-violet-600 to-fuchsia-600',
+    },
 ];
 
 export default function WebsiteSettingsPage() {
@@ -238,21 +288,42 @@ export default function WebsiteSettingsPage() {
                                                     key={tmp.id}
                                                     onClick={() => handleChange('theme', 'layoutVariant', tmp.id)}
                                                     className={cn(
-                                                        "p-5 rounded-[1.75rem] border-2 text-left flex items-center gap-6 transition-all group",
+                                                        "p-4 rounded-[1.75rem] border-2 text-left flex items-center gap-5 transition-all group overflow-hidden",
                                                         config.theme.layoutVariant === tmp.id
                                                             ? "bg-indigo-50 border-indigo-600 shadow-lg shadow-indigo-100"
-                                                            : "bg-white border-zinc-100 hover:border-zinc-200"
+                                                            : "bg-white border-zinc-100 hover:border-zinc-300"
                                                     )}
                                                 >
-                                                    <div className={cn("w-20 h-28 rounded-xl shadow-inner flex items-center justify-center shrink-0", tmp.color)}>
-                                                        <Check className={cn("w-8 h-8", tmp.id === 'minimal' ? 'text-zinc-200' : 'text-white/20')} />
+                                                    {/* Mini Preview */}
+                                                    <div className={cn("w-20 h-28 rounded-xl shrink-0 overflow-hidden relative border border-zinc-200/20", tmp.bg)}>
+                                                        {/* Mock Header */}
+                                                        <div className="p-2 flex justify-center">
+                                                            <div className={cn("w-6 h-6 rounded-full", tmp.accent)} />
+                                                        </div>
+                                                        {/* Mock Title */}
+                                                        <div className="px-2 space-y-1">
+                                                            <div className={cn("h-1.5 w-full rounded-full opacity-60", tmp.dot)} />
+                                                            <div className={cn("h-1 w-3/4 rounded-full opacity-30", tmp.sub.replace('text-', 'bg-'))} />
+                                                        </div>
+                                                        {/* Mock Cards */}
+                                                        <div className="px-2 mt-2 space-y-1.5">
+                                                            {[1, 2].map(i => (
+                                                                <div key={i} className={cn("h-5 rounded-md border", tmp.card)} />
+                                                            ))}
+                                                        </div>
+                                                        {/* Active check */}
+                                                        {config.theme.layoutVariant === tmp.id && (
+                                                            <div className="absolute top-1 right-1 w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center">
+                                                                <Check className="w-3 h-3 text-white" />
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div className="flex-1">
                                                         <h4 className="font-black text-zinc-900 mb-1 flex items-center gap-2">
                                                             {tmp.name}
                                                             {config.theme.layoutVariant === tmp.id && <Badge variant="indigo" className="py-0">Ativo</Badge>}
                                                         </h4>
-                                                        <p className="text-xs font-medium text-zinc-400 group-hover:text-zinc-500 transition-colors">{tmp.desc}</p>
+                                                        <p className="text-xs font-medium text-zinc-400 group-hover:text-zinc-600 transition-colors">{tmp.desc}</p>
                                                     </div>
                                                 </button>
                                             ))}

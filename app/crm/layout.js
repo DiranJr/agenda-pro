@@ -13,7 +13,8 @@ import {
     X,
     Search,
     Plus,
-    BarChart3
+    BarChart3,
+    Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/app/components/ui/core";
@@ -24,6 +25,7 @@ const navSections = [
         items: [
             { href: "/crm/dashboard", label: "Dashboard", icon: BarChart3 },
             { href: "/crm/calendar", label: "Calendário", icon: Calendar },
+            { href: "/crm/schedule", label: "Grade de Trabalho", icon: Clock },
             { href: "/crm/customers", label: "Clientes", icon: Users },
             { href: "/crm/services", label: "Serviços", icon: Scissors },
             { href: "/crm/staff", label: "Equipe", icon: Users },

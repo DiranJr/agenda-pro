@@ -2,8 +2,111 @@
 import { useState, useEffect } from 'react';
 import { DateTime } from 'luxon';
 
+// ─── THEME SYSTEM ─────────────────────────────────────────────────────────────
+const THEMES = {
+    modern: {
+        page: 'bg-zinc-950 text-white min-h-screen',
+        header: 'bg-zinc-950 text-white pt-20 pb-16 px-6 text-center relative overflow-hidden',
+        logoBox: 'bg-white/10 backdrop-blur-md border border-white/20 text-white',
+        title: 'text-white',
+        subtitle: 'text-zinc-400',
+        card: 'bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20',
+        serviceName: 'text-white',
+        price: 'text-indigo-400',
+        meta: 'text-zinc-500',
+        input: 'bg-white/10 border-white/20 text-white placeholder-white/30 focus:border-indigo-500',
+        slotBtn: 'bg-white/10 text-white hover:bg-indigo-600 border-white/20',
+        cta: 'bg-indigo-600 text-white hover:bg-indigo-500',
+        badge: 'bg-white/10 text-white/60 text-[10px]',
+        backBtn: 'bg-white/10 text-white/60 hover:bg-white/20',
+        summaryCard: 'bg-white/5 border-white/10',
+        footer: 'text-zinc-700',
+        label: 'text-zinc-400',
+    },
+    glass: {
+        page: 'min-h-screen text-zinc-900',
+        pageBg: 'fixed inset-0 z-[-1] bg-gradient-to-br from-indigo-200 via-purple-100 to-pink-100',
+        header: 'bg-white/30 backdrop-blur-xl border-b border-white/40 pt-20 pb-16 px-6 text-center relative',
+        logoBox: 'bg-white/60 backdrop-blur-md border border-white/80 text-indigo-700 shadow-xl',
+        title: 'text-zinc-900',
+        subtitle: 'text-zinc-600',
+        card: 'bg-white/50 backdrop-blur-xl border border-white/60 text-zinc-900 hover:bg-white/70 shadow-lg shadow-purple-100/30 hover:shadow-xl',
+        serviceName: 'text-zinc-900',
+        price: 'text-indigo-600',
+        meta: 'text-zinc-500',
+        input: 'bg-white/60 backdrop-blur-md border-white/60 text-zinc-900 placeholder-zinc-400 focus:border-indigo-500 focus:bg-white/80',
+        slotBtn: 'bg-white/50 backdrop-blur-md text-zinc-800 hover:bg-indigo-600 hover:text-white border-white/60',
+        cta: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-200',
+        badge: 'bg-white/40 backdrop-blur-md text-zinc-500 text-[10px] border border-white/60',
+        backBtn: 'bg-white/40 backdrop-blur-md text-zinc-500 hover:bg-white/70',
+        summaryCard: 'bg-white/40 backdrop-blur-xl border-white/60',
+        footer: 'text-zinc-400',
+        label: 'text-zinc-500',
+    },
+    minimal: {
+        page: 'bg-white text-zinc-900 min-h-screen',
+        header: 'bg-white border-b border-zinc-100 pt-20 pb-16 px-6 text-center',
+        logoBox: 'bg-zinc-900 text-white border-zinc-900',
+        title: 'text-zinc-900',
+        subtitle: 'text-zinc-500',
+        card: 'bg-white border border-zinc-200 text-zinc-900 hover:border-zinc-400 shadow-none',
+        serviceName: 'text-zinc-900',
+        price: 'text-zinc-900 font-black',
+        meta: 'text-zinc-400',
+        input: 'bg-white border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:border-zinc-900',
+        slotBtn: 'bg-zinc-50 text-zinc-800 hover:bg-zinc-900 hover:text-white border-zinc-200',
+        cta: 'bg-zinc-900 text-white hover:bg-zinc-800',
+        badge: 'bg-zinc-100 text-zinc-500 text-[10px]',
+        backBtn: 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200',
+        summaryCard: 'bg-zinc-50 border-zinc-200',
+        footer: 'text-zinc-300',
+        label: 'text-zinc-500',
+    },
+    elegant: {
+        page: 'min-h-screen text-stone-900',
+        pageBg: 'fixed inset-0 z-[-1] bg-[#F8F4EF]',
+        header: 'bg-[#F8F4EF] pt-20 pb-16 px-6 text-center',
+        logoBox: 'bg-stone-800 text-amber-100 border-stone-800',
+        title: 'text-stone-900 font-serif',
+        subtitle: 'text-stone-500 font-light italic',
+        card: 'bg-white border border-stone-200 text-stone-900 hover:border-amber-400 hover:shadow-amber-50 shadow-sm',
+        serviceName: 'text-stone-900',
+        price: 'text-amber-700',
+        meta: 'text-stone-400',
+        input: 'bg-white border-stone-300 text-stone-900 placeholder-stone-400 focus:border-amber-500',
+        slotBtn: 'bg-amber-50 text-stone-800 hover:bg-amber-500 hover:text-white border-stone-200',
+        cta: 'bg-stone-800 text-white hover:bg-stone-900',
+        badge: 'bg-stone-100 text-stone-400 text-[10px]',
+        backBtn: 'bg-stone-100 text-stone-500 hover:bg-stone-200',
+        summaryCard: 'bg-white border-stone-200',
+        footer: 'text-stone-300',
+        label: 'text-stone-500',
+    },
+    dark: {
+        page: 'min-h-screen text-white',
+        pageBg: 'fixed inset-0 z-[-1] bg-black',
+        header: 'bg-black pt-20 pb-16 px-6 text-center relative overflow-hidden',
+        headerGlow: true,
+        logoBox: 'bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white border-transparent shadow-2xl shadow-violet-900',
+        title: 'text-white',
+        subtitle: 'text-zinc-500',
+        card: 'bg-zinc-900 border border-zinc-800 text-white hover:border-violet-600/60 hover:bg-zinc-800/80 shadow-xl shadow-black/20',
+        serviceName: 'text-white',
+        price: 'text-violet-400',
+        meta: 'text-zinc-600',
+        input: 'bg-zinc-900 border-zinc-800 text-white placeholder-zinc-600 focus:border-violet-500',
+        slotBtn: 'bg-zinc-900 text-white hover:bg-violet-700 border-zinc-800',
+        cta: 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:opacity-90 shadow-xl shadow-violet-900/40',
+        badge: 'bg-zinc-900 text-zinc-600 text-[10px] border-zinc-800',
+        backBtn: 'bg-zinc-900 text-zinc-500 hover:bg-zinc-800',
+        summaryCard: 'bg-zinc-900 border-zinc-800',
+        footer: 'text-zinc-800',
+        label: 'text-zinc-500',
+    },
+};
+
 export default function PublicHomeUI({ tenant, services, staff }) {
-    const [step, setStep] = useState(1); // 1: Home/Services, 2: Staff, 3: Slots, 4: Details
+    const [step, setStep] = useState(1);
     const [booking, setBooking] = useState({
         service: null,
         staff: null,
@@ -12,32 +115,28 @@ export default function PublicHomeUI({ tenant, services, staff }) {
     });
     const [slots, setSlots] = useState([]);
     const [loadingSlots, setLoadingSlots] = useState(false);
+    const [bookingDone, setBookingDone] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const website = tenant.websiteConfig || {};
     const theme = tenant.theme || {};
     const variant = theme.layoutVariant || 'modern';
+    const primaryColor = theme.colors?.primary || '#4f46e5';
+    const t = THEMES[variant] || THEMES.modern;
 
-    // Buscar slots quando profissional e data são selecionados
     useEffect(() => {
         if (step === 3 && booking.staff && booking.service && booking.date) {
             setLoadingSlots(true);
             fetch(`/api/public/availability?slug=${tenant.slug}&staffId=${booking.staff.id}&serviceId=${booking.service.id}&date=${booking.date}`)
                 .then(res => res.json())
-                .then(data => {
-                    setSlots(data.slots || []);
-                    setLoadingSlots(false);
-                });
+                .then(data => { setSlots(data.slots || []); setLoadingSlots(false); });
         }
     }, [step, booking.staff, booking.service, booking.date, tenant.slug]);
 
     const handleBooking = async (e) => {
         e.preventDefault();
+        setSubmitting(true);
         const formData = new FormData(e.target);
-        const customer = {
-            name: formData.get('name'),
-            phone: formData.get('phone'),
-        };
-
         const res = await fetch('/api/public/book', {
             method: 'POST',
             body: JSON.stringify({
@@ -46,145 +145,179 @@ export default function PublicHomeUI({ tenant, services, staff }) {
                 staffId: booking.staff.id,
                 date: booking.date,
                 time: booking.time,
-                customer
+                customer: { name: formData.get('name'), phone: formData.get('phone') }
             }),
             headers: { 'Content-Type': 'application/json' }
         });
-
+        setSubmitting(false);
         if (res.ok) {
-            alert("Agendamento realizado com sucesso!");
-            setStep(1);
+            setBookingDone(true);
         } else {
             const err = await res.json();
-            alert("Erro ao agendar: " + err.error);
+            alert("Erro ao agendar: " + (err.error?.message || err.error));
         }
     };
 
-    // Estilos baseados no Template
-    const getBgClass = () => {
-        if (variant === 'dark') return 'bg-zinc-950 text-white';
-        if (variant === 'minimal') return 'bg-white text-zinc-900';
-        if (variant === 'glass') return 'bg-indigo-50/50 text-zinc-900';
-        if (variant === 'elegant') return 'bg-stone-50 text-zinc-900';
-        return 'bg-zinc-50/50 text-zinc-900';
-    };
+    const inputClass = `w-full p-4 mt-1 rounded-[1.25rem] border outline-none focus:ring-4 focus:ring-current/10 transition-all font-medium ${t.input}`;
+    const radius = theme.borderRadius || '1.25rem';
 
-    const getCardClass = () => {
-        if (variant === 'dark') return 'bg-zinc-900 border-zinc-800 text-white';
-        if (variant === 'glass') return 'bg-white/40 backdrop-blur-xl border-white/40 shadow-xl shadow-indigo-100/20';
-        if (variant === 'minimal') return 'bg-white border-zinc-100 shadow-none';
-        if (variant === 'elegant') return 'bg-white border-stone-200 shadow-sm';
-        return 'bg-white border-zinc-100 shadow-sm';
-    };
+    if (bookingDone) return (
+        <div className={t.page}>
+            {t.pageBg && <div className={t.pageBg} />}
+            <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center space-y-6">
+                <div
+                    className="w-24 h-24 flex items-center justify-center rounded-full text-4xl shadow-2xl"
+                    style={{ backgroundColor: primaryColor }}
+                >
+                    ✓
+                </div>
+                <div>
+                    <h1 className={`text-3xl font-black mb-2 ${t.title}`}>Agendado! 🎉</h1>
+                    <p className={`text-sm ${t.subtitle}`}>
+                        Seu horário em <strong>{booking.staff?.name}</strong> para <strong>{booking.service?.name}</strong> está confirmado.
+                    </p>
+                </div>
+                <button
+                    onClick={() => { setStep(1); setBookingDone(false); setBooking({ service: null, staff: null, date: DateTime.now().toISODate(), time: null }); }}
+                    className={`py-4 px-8 rounded-[${radius}] font-black uppercase tracking-widest text-sm transition-all active:scale-95 ${t.cta}`}
+                >
+                    Fazer Outro Agendamento
+                </button>
+                <p className={`text-[10px] font-black uppercase tracking-widest ${t.footer}`}>
+                    Powered by Agenda Pro
+                </p>
+            </div>
+        </div>
+    );
 
     return (
-        <div className={`max-w-md mx-auto min-h-screen flex flex-col pt-0 pb-10 transition-colors duration-500 ${getBgClass()}`}>
+        <div className={t.page}>
+            {t.pageBg && <div className={t.pageBg} />}
 
-            {/* Header / Hero */}
-            <header className={`relative p-8 pb-12 pt-20 text-center overflow-hidden transition-all duration-700 ${variant === 'dark' ? 'bg-zinc-900' : 'bg-white'}`}>
-                {website.heroImageUrl && (
-                    <div className="absolute inset-0 z-0 opacity-40">
-                        <img src={website.heroImageUrl} alt="Hero" className="w-full h-full object-cover" />
-                        <div className={`absolute inset-0 bg-gradient-to-b ${variant === 'dark' ? 'from-zinc-900/40 to-zinc-900' : 'from-white/40 to-white'}`}></div>
+            {/* Header */}
+            <header className={t.header}>
+                {variant === 'modern' && (
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute -top-20 -left-20 w-96 h-96 rounded-full opacity-[0.08]" style={{ background: `radial-gradient(circle, ${primaryColor}, transparent)` }} />
+                        <div className="absolute -bottom-10 -right-10 w-64 h-64 rounded-full opacity-[0.06]" style={{ background: `radial-gradient(circle, ${primaryColor}, transparent)` }} />
                     </div>
                 )}
-
+                {t.headerGlow && (
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-48 opacity-20" style={{ background: `radial-gradient(ellipse, ${primaryColor}, transparent)` }} />
+                    </div>
+                )}
+                {website.heroImageUrl && (
+                    <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={website.heroImageUrl} alt="Capa" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-current" />
+                    </div>
+                )}
                 <div className="relative z-10">
                     <div
-                        style={{ backgroundColor: 'var(--primary-color)', borderRadius: 'var(--border-radius)' }}
-                        className="w-24 h-24 mx-auto mb-6 flex items-center justify-center overflow-hidden shadow-2xl border-4 border-white/20"
+                        className={`w-24 h-24 mx-auto mb-6 flex items-center justify-center overflow-hidden border-4 border-white/20 shadow-2xl ${t.logoBox}`}
+                        style={{ borderRadius: radius }}
                     >
-                        {website.logoUrl ? <img src={website.logoUrl} alt="Logo" className="w-full h-full object-cover" /> : <div className="font-black text-3xl text-white">{tenant.name[0]}</div>}
+                        {website.logoUrl
+                            // eslint-disable-next-line @next/next/no-img-element
+                            ? <img src={website.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                            : <span className="font-black text-3xl">{tenant.name[0]}</span>
+                        }
                     </div>
-                    <h1 className="text-4xl font-black tracking-tight mb-2 leading-tight">{website.heroTitle || tenant.name}</h1>
-                    <p className={`text-sm leading-relaxed max-w-[280px] mx-auto opacity-70`}>
-                        {website.heroSubtitle || "Especialistas em beleza e estética."}
+                    <h1 className={`text-4xl font-black tracking-tight mb-3 leading-tight ${t.title}`}>
+                        {website.heroTitle || tenant.name}
+                    </h1>
+                    <p className={`text-sm max-w-xs mx-auto opacity-80 ${t.subtitle}`}>
+                        {website.heroSubtitle || 'Especialistas em beleza e estética.'}
                     </p>
                 </div>
             </header>
 
-            <div className="p-6 space-y-10">
-                {step === 1 && (
-                    <div className="space-y-10">
-                        {/* Gallery Section */}
-                        {website.gallery && website.gallery.length > 0 && (
-                            <div className="space-y-4">
-                                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Nosso Trabalho</h2>
-                                <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6 pb-2">
-                                    {website.gallery.map((url, i) => (
-                                        <div key={i} className="min-w-[260px] aspect-[4/5] rounded-[2rem] overflow-hidden border border-white/20 shadow-xl group">
-                                            <img src={url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Trabalho realizado" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+            <div className="max-w-md mx-auto p-6 space-y-10 pb-20">
 
-                        <div className="flex justify-between items-end mb-2">
-                            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Procedimentos & Serviços</h2>
+                {/* Gallery */}
+                {step === 1 && website.gallery?.length > 0 && (
+                    <div className="space-y-4">
+                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${t.label}`}>Nosso Trabalho</p>
+                        <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6 pb-2">
+                            {website.gallery.map((url, i) => (
+                                <div key={i} className="min-w-[240px] aspect-[4/5] overflow-hidden shadow-xl group" style={{ borderRadius: radius }}>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                </div>
+                            ))}
                         </div>
-                        <div className="grid gap-4">
+                    </div>
+                )}
+
+                {/* Step 1: Services */}
+                {step === 1 && (
+                    <div className="space-y-4">
+                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${t.label}`}>Procedimentos & Serviços</p>
+                        <div className="grid gap-3">
                             {services.map(s => (
                                 <button
                                     key={s.id}
                                     onClick={() => { setBooking({ ...booking, service: s }); setStep(2); }}
-                                    className={`p-4 rounded-[var(--border-radius)] border transition-all text-left flex gap-4 items-center group active:scale-[0.98] ${getCardClass()}`}
+                                    className={`p-4 border transition-all text-left flex gap-4 items-center group active:scale-[0.98] ${t.card}`}
+                                    style={{ borderRadius: radius }}
                                 >
-                                    <div className="w-16 h-16 rounded-2xl overflow-hidden bg-zinc-100 flex-shrink-0 border border-zinc-50 shadow-inner">
-                                        {s.imageUrl ? (
-                                            <img src={s.imageUrl} alt={s.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-zinc-300">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6.75A1.5 1.5 0 0 0 22.5 5.25H2.25A1.5 1.5 0 0 0 .75 6.75v10.5a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                                </svg>
-                                            </div>
-                                        )}
+                                    <div className="w-16 h-16 overflow-hidden bg-zinc-100/10 flex-shrink-0 shadow-inner" style={{ borderRadius: `calc(${radius} * 0.7)` }}>
+                                        {s.imageUrl
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            ? <img src={s.imageUrl} alt={s.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                            : <div className="w-full h-full flex items-center justify-center opacity-20 text-current">⚡</div>
+                                        }
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="font-bold text-sm mb-1 group-hover:text-[var(--primary-color)] transition-colors">{s.name}</h3>
+                                        <h3 className={`font-bold text-sm mb-1 ${t.serviceName}`}>{s.name}</h3>
                                         <div className="flex items-center gap-3">
-                                            <span className="text-[10px] opacity-40 font-bold uppercase tracking-widest">{s.duration} min</span>
-                                            {website.showPrices !== false && <span className="font-black text-xs text-[var(--primary-color)]">R$ {parseFloat(s.price).toFixed(2)}</span>}
+                                            <span className={`text-[10px] font-bold uppercase tracking-widest opacity-50 ${t.meta}`}>{s.duration} min</span>
+                                            {website.showPrices !== false && (
+                                                <span className={`font-black text-xs ${t.price}`}>R$ {parseFloat(s.price).toFixed(2)}</span>
+                                            )}
                                         </div>
                                     </div>
-                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-[var(--primary-color)]">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 opacity-30 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 transition-transform shrink-0">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                    </svg>
                                 </button>
                             ))}
+                            {services.length === 0 && (
+                                <div className="py-16 text-center opacity-30">
+                                    <p className="text-sm font-black uppercase tracking-widest">Nenhum serviço disponível</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
 
+                {/* Step 2: Staff */}
                 {step === 2 && (
                     <div className="space-y-6">
                         <div className="flex items-center gap-4">
-                            <button onClick={() => setStep(1)} className="text-zinc-400 p-2 hover:bg-zinc-100 rounded-full transition-all">
+                            <button onClick={() => setStep(1)} className={`p-3 rounded-full transition-all ${t.backBtn}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                                 </svg>
                             </button>
-                            <h2 className="text-sm font-black uppercase tracking-widest opacity-40">Com quem?</h2>
+                            <p className={`text-xs font-black uppercase tracking-widest opacity-40 ${t.title}`}>Com quem?</p>
                         </div>
-                        <div className="grid gap-4">
-                            {staff.filter(st =>
-                                !booking.service ||
-                                st.services.some(s => s.serviceId === booking.service.id)
-                            ).map(st => (
+                        <div className="grid gap-3">
+                            {staff.filter(st => !booking.service || st.services.some(s => s.serviceId === booking.service.id)).map(st => (
                                 <button
                                     key={st.id}
                                     onClick={() => { setBooking({ ...booking, staff: st }); setStep(3); }}
-                                    className={`p-5 rounded-[var(--border-radius)] border text-left flex items-center gap-4 hover:border-[var(--primary-color)] transition-all active:scale-[0.98] ${getCardClass()}`}
+                                    className={`p-5 border text-left flex items-center gap-4 active:scale-[0.98] transition-all ${t.card}`}
+                                    style={{ borderRadius: radius }}
                                 >
-                                    <div className="w-14 h-14 bg-zinc-100 rounded-full flex-shrink-0 border-2 border-white shadow-sm flex items-center justify-center text-zinc-300 font-black">
+                                    <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center font-black text-lg shadow-sm" style={{ borderRadius: radius, background: primaryColor, color: 'white' }}>
                                         {st.name[0]}
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-sm">{st.name}</h3>
-                                        <p className="text-[10px] opacity-40 font-bold uppercase tracking-widest">{st.location?.name || 'Unidade Principal'}</p>
+                                        <h3 className={`font-bold text-sm ${t.serviceName}`}>{st.name}</h3>
+                                        <p className={`text-[10px] font-bold uppercase tracking-widest opacity-40 ${t.meta}`}>{st.location?.name || 'Unidade Principal'}</p>
                                     </div>
                                 </button>
                             ))}
@@ -192,28 +325,28 @@ export default function PublicHomeUI({ tenant, services, staff }) {
                     </div>
                 )}
 
+                {/* Step 3: Date & Time */}
                 {step === 3 && (
                     <div className="space-y-6">
                         <div className="flex items-center gap-4">
-                            <button onClick={() => setStep(2)} className="text-zinc-400 p-2 hover:bg-zinc-100 rounded-full transition-all">
+                            <button onClick={() => setStep(2)} className={`p-3 rounded-full transition-all ${t.backBtn}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                                 </svg>
                             </button>
-                            <h2 className="text-sm font-black uppercase tracking-widest opacity-40">Escolha o horário</h2>
+                            <p className={`text-xs font-black uppercase tracking-widest opacity-40 ${t.title}`}>Escolha o horário</p>
                         </div>
-
                         <input
                             type="date"
                             value={booking.date}
+                            min={DateTime.now().toISODate()}
                             onChange={e => setBooking({ ...booking, date: e.target.value })}
-                            className={`w-full p-4 rounded-[var(--border-radius)] border font-bold text-sm outline-none focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-opacity-20 transition-all ${getCardClass()}`}
+                            className={`w-full p-4 rounded-[${radius}] border font-bold text-sm outline-none focus:ring-4 focus:ring-current/10 transition-all ${t.input}`}
                         />
-
                         {loadingSlots ? (
-                            <div className="space-y-3 py-10">
-                                <div className="w-10 h-10 border-4 border-[var(--primary-color)] border-t-transparent rounded-full animate-spin mx-auto"></div>
-                                <p className="text-center text-[10px] font-black uppercase tracking-widest opacity-40">Buscando disponibilidade...</p>
+                            <div className="py-10 text-center space-y-3">
+                                <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: primaryColor, borderTopColor: 'transparent' }} />
+                                <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 ${t.label}`}>Buscando horários...</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-3 gap-3">
@@ -221,17 +354,16 @@ export default function PublicHomeUI({ tenant, services, staff }) {
                                     <button
                                         key={slot}
                                         onClick={() => { setBooking({ ...booking, time: slot }); setStep(4); }}
-                                        className={`p-4 border rounded-2xl text-sm font-bold hover:bg-[var(--primary-color)] hover:text-white hover:border-transparent transition-all shadow-sm active:scale-90 ${getCardClass()}`}
+                                        className={`p-4 border font-bold text-sm active:scale-90 transition-all shadow-sm ${t.slotBtn}`}
+                                        style={{ borderRadius: radius }}
                                     >
                                         {slot}
                                     </button>
                                 ))}
                                 {slots.length === 0 && (
-                                    <div className="col-span-3 text-center py-20 opacity-30">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-12 h-12 mx-auto mb-4">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008h-.008v-.008Z" />
-                                        </svg>
-                                        <p className="text-xs font-bold uppercase tracking-widest">Nenhum horário livre nesta data.</p>
+                                    <div className="col-span-3 text-center py-16 opacity-30">
+                                        <p className="text-sm font-black uppercase tracking-widest">Sem horários disponíveis</p>
+                                        <p className="text-xs mt-2">Tente outra data ou profissional</p>
                                     </div>
                                 )}
                             </div>
@@ -239,70 +371,60 @@ export default function PublicHomeUI({ tenant, services, staff }) {
                     </div>
                 )}
 
+                {/* Step 4: Confirm */}
                 {step === 4 && (
                     <div className="space-y-6">
                         <div className="flex items-center gap-4">
-                            <button onClick={() => setStep(3)} className="text-zinc-400 p-2 hover:bg-zinc-100 rounded-full transition-all">
+                            <button onClick={() => setStep(3)} className={`p-3 rounded-full transition-all ${t.backBtn}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                                 </svg>
                             </button>
-                            <h2 className="text-sm font-black uppercase tracking-widest opacity-40">Finalizar Agendamento</h2>
+                            <p className={`text-xs font-black uppercase tracking-widest opacity-40 ${t.title}`}>Finalizar Agendamento</p>
                         </div>
-
-                        <div className={`p-6 border rounded-[var(--border-radius)] ${getCardClass()}`}>
-                            <div className="text-[10px] font-black uppercase opacity-40 mb-4 tracking-widest">Resumo</div>
+                        <div className={`p-6 border ${t.summaryCard}`} style={{ borderRadius: radius }}>
+                            <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 mb-4 ${t.label}`}>Resumo</p>
                             <div className="space-y-3">
-                                <div className="flex justify-between font-black text-lg">
-                                    <span>{booking.service.name}</span>
-                                    <span style={{ color: 'var(--primary-color)' }}>R$ {parseFloat(booking.service.price).toFixed(2)}</span>
+                                <div className="flex justify-between items-center font-black">
+                                    <span className={t.serviceName}>{booking.service.name}</span>
+                                    <span style={{ color: primaryColor }}>R$ {parseFloat(booking.service.price).toFixed(2)}</span>
                                 </div>
-                                <div className="flex items-center gap-2 text-xs font-bold opacity-60">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                                    </svg>
-                                    {booking.staff.name}
-                                </div>
-                                <div className="flex items-center gap-2 text-xs font-bold opacity-60">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                                    </svg>
-                                    {DateTime.fromISO(booking.date).setLocale('pt-BR').toLocaleString(DateTime.DATE_MED)} às {booking.time}
+                                <div className={`text-xs font-bold opacity-60 ${t.meta}`}>
+                                    👤 {booking.staff.name} · 📅 {DateTime.fromISO(booking.date).setLocale('pt-BR').toLocaleString(DateTime.DATE_MED)} às {booking.time}
                                 </div>
                             </div>
                         </div>
-
                         <form onSubmit={handleBooking} className="space-y-4">
                             <div>
-                                <label className="text-[10px] font-black uppercase opacity-40 tracking-widest ml-1">Seu Nome</label>
-                                <input name="name" required className={`w-full p-4 mt-1 border rounded-[var(--border-radius)] outline-none focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-opacity-20 transition-all ${getCardClass()}`} placeholder="Como podemos te chamar?" />
+                                <label className={`text-[10px] font-black uppercase tracking-widest ml-1 ${t.label}`}>Seu Nome</label>
+                                <input name="name" required className={inputClass} placeholder="Como podemos te chamar?" />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black uppercase opacity-40 tracking-widest ml-1">WhatsApp</label>
-                                <input name="phone" required className={`w-full p-4 mt-1 border rounded-[var(--border-radius)] outline-none focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-opacity-20 transition-all ${getCardClass()}`} placeholder="(00) 00000-0000" />
+                                <label className={`text-[10px] font-black uppercase tracking-widest ml-1 ${t.label}`}>WhatsApp</label>
+                                <input name="phone" required className={inputClass} placeholder="(00) 00000-0000" />
                             </div>
                             <button
                                 type="submit"
-                                style={{ backgroundColor: 'var(--primary-color)' }}
-                                className="w-full py-5 text-white font-black rounded-[var(--border-radius)] shadow-xl mt-4 active:scale-[0.98] transition-all hover:brightness-110"
+                                disabled={submitting}
+                                className={`w-full py-5 font-black rounded-[${radius}] text-sm uppercase tracking-widest mt-4 active:scale-[0.98] transition-all ${t.cta} ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                CONFIRMAR AGENDAMENTO
+                                {submitting ? 'Confirmando...' : 'Confirmar Agendamento'}
                             </button>
                         </form>
                     </div>
                 )}
             </div>
 
-            <footer className="mt-auto p-10 text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-20">
-                    Tecnologia <span className={variant === 'dark' ? 'text-white' : 'text-zinc-900'}>Agenda Pro</span>
+            <footer className="text-center p-10">
+                <p className={`text-[10px] font-black uppercase tracking-[0.4em] ${t.footer}`}>
+                    Tecnologia Agenda Pro
                 </p>
             </footer>
 
-            {/* Floating WhatsApp Button */}
+            {/* WhatsApp Float */}
             {website.contactWhatsapp && (
                 <a
-                    href={`https://wa.me/${website.contactWhatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Gostaria de tirar uma dúvida sobre os serviços do ${tenant.name}.`)}`}
+                    href={`https://wa.me/${website.contactWhatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Gostaria de saber mais sobre ${tenant.name}.`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="fixed bottom-6 right-6 w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-xl shadow-[#25D366]/30 hover:scale-110 active:scale-95 transition-all z-50"
