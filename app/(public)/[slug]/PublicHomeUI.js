@@ -4,105 +4,84 @@ import { DateTime } from 'luxon';
 
 // ─── THEME SYSTEM ─────────────────────────────────────────────────────────────
 const THEMES = {
-    modern: {
-        page: 'bg-zinc-950 text-white min-h-screen',
-        header: 'bg-zinc-950 text-white pt-20 pb-16 px-6 text-center relative overflow-hidden',
-        logoBox: 'bg-white/10 backdrop-blur-md border border-white/20 text-white',
-        title: 'text-white',
-        subtitle: 'text-zinc-400',
-        card: 'bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20',
-        serviceName: 'text-white',
-        price: 'text-indigo-400',
-        meta: 'text-zinc-500',
-        input: 'bg-white/10 border-white/20 text-white placeholder-white/30 focus:border-indigo-500',
-        slotBtn: 'bg-white/10 text-white hover:bg-indigo-600 border-white/20',
-        cta: 'bg-indigo-600 text-white hover:bg-indigo-500',
-        badge: 'bg-white/10 text-white/60 text-[10px]',
-        backBtn: 'bg-white/10 text-white/60 hover:bg-white/20',
-        summaryCard: 'bg-white/5 border-white/10',
-        footer: 'text-zinc-700',
+    glow: {
+        page: 'bg-white text-zinc-900 min-h-screen font-sans',
+        header: 'bg-white pt-20 pb-16 px-6 text-center relative overflow-hidden',
+        logoBox: 'bg-[#FCE7F3] text-[#E11D48] shadow-sm',
+        title: 'text-zinc-900 font-bold',
+        subtitle: 'text-zinc-500',
+        card: 'bg-[#FCE7F3] border-none text-zinc-900 hover:scale-[1.02] transition-all',
+        serviceName: 'text-[#E11D48] font-bold',
+        price: 'text-zinc-900',
+        meta: 'text-zinc-400',
+        input: 'bg-[#FCE7F3] border-transparent text-zinc-900 placeholder-zinc-400 focus:bg-white focus:border-[#E11D48]',
+        slotBtn: 'bg-white text-zinc-800 hover:bg-[#E11D48] hover:text-white',
+        cta: 'bg-[#E11D48] text-white hover:opacity-90',
+        badge: 'bg-[#E11D48]/10 text-[#E11D48] text-[10px]',
+        backBtn: 'bg-white shadow-sm text-zinc-400 hover:text-zinc-600',
+        summaryCard: 'bg-[#FCE7F3] border-none',
+        footer: 'text-zinc-300',
         label: 'text-zinc-400',
     },
-    glass: {
-        page: 'min-h-screen text-zinc-900 bg-gradient-to-br from-indigo-200 via-purple-100 to-pink-100',
-        pageBg: 'fixed inset-0 z-[-1] bg-gradient-to-br from-indigo-200 via-purple-100 to-pink-100',
-        header: 'bg-white/30 backdrop-blur-xl border-b border-white/40 pt-20 pb-16 px-6 text-center relative',
-        logoBox: 'bg-white/60 backdrop-blur-md border border-white/80 text-indigo-700 shadow-xl',
-        title: 'text-zinc-900',
-        subtitle: 'text-zinc-600',
-        card: 'bg-white/50 backdrop-blur-xl border border-white/60 text-zinc-900 hover:bg-white/70 shadow-lg shadow-purple-100/30 hover:shadow-xl',
-        serviceName: 'text-zinc-900',
-        price: 'text-indigo-600',
-        meta: 'text-zinc-500',
-        input: 'bg-white/60 backdrop-blur-md border-white/60 text-zinc-900 placeholder-zinc-400 focus:border-indigo-500 focus:bg-white/80',
-        slotBtn: 'bg-white/50 backdrop-blur-md text-zinc-800 hover:bg-indigo-600 hover:text-white border-white/60',
-        cta: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-200',
-        badge: 'bg-white/40 backdrop-blur-md text-zinc-500 text-[10px] border border-white/60',
-        backBtn: 'bg-white/40 backdrop-blur-md text-zinc-500 hover:bg-white/70',
-        summaryCard: 'bg-white/40 backdrop-blur-xl border-white/60',
-        footer: 'text-zinc-400',
-        label: 'text-zinc-500',
-    },
-    minimal: {
-        page: 'bg-white text-zinc-900 min-h-screen',
-        header: 'bg-white border-b border-zinc-100 pt-20 pb-16 px-6 text-center',
-        logoBox: 'bg-zinc-900 text-white border-zinc-900',
-        title: 'text-zinc-900',
-        subtitle: 'text-zinc-500',
-        card: 'bg-white border border-zinc-200 text-zinc-900 hover:border-zinc-400 shadow-none',
-        serviceName: 'text-zinc-900',
-        price: 'text-zinc-900 font-black',
-        meta: 'text-zinc-400',
-        input: 'bg-white border-zinc-300 text-zinc-900 placeholder-zinc-400 focus:border-zinc-900',
-        slotBtn: 'bg-zinc-50 text-zinc-800 hover:bg-zinc-900 hover:text-white border-zinc-200',
-        cta: 'bg-zinc-900 text-white hover:bg-zinc-800',
-        badge: 'bg-zinc-100 text-zinc-500 text-[10px]',
-        backBtn: 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200',
-        summaryCard: 'bg-zinc-50 border-zinc-200',
-        footer: 'text-zinc-300',
-        label: 'text-zinc-500',
-    },
-    elegant: {
-        page: 'min-h-screen text-stone-900 bg-[#F8F4EF]',
-        pageBg: 'fixed inset-0 z-[-1] bg-[#F8F4EF]',
-        header: 'bg-[#F8F4EF] pt-20 pb-16 px-6 text-center',
-        logoBox: 'bg-stone-800 text-amber-100 border-stone-800',
-        title: 'text-stone-900 font-serif',
-        subtitle: 'text-stone-500 font-light italic',
-        card: 'bg-white border border-stone-200 text-stone-900 hover:border-amber-400 hover:shadow-amber-50 shadow-sm',
-        serviceName: 'text-stone-900',
-        price: 'text-amber-700',
-        meta: 'text-stone-400',
-        input: 'bg-white border-stone-300 text-stone-900 placeholder-stone-400 focus:border-amber-500',
-        slotBtn: 'bg-amber-50 text-stone-800 hover:bg-amber-500 hover:text-white border-stone-200',
-        cta: 'bg-stone-800 text-white hover:bg-stone-900',
-        badge: 'bg-stone-100 text-stone-400 text-[10px]',
-        backBtn: 'bg-stone-100 text-stone-500 hover:bg-stone-200',
-        summaryCard: 'bg-white border-stone-200',
-        footer: 'text-stone-300',
-        label: 'text-stone-500',
-    },
-    dark: {
-        page: 'min-h-screen text-white bg-black',
-        pageBg: 'fixed inset-0 z-[-1] bg-black',
-        header: 'bg-black pt-20 pb-16 px-6 text-center relative overflow-hidden',
+    velvet: {
+        page: 'bg-[#0F0F0F] text-white min-h-screen font-sans',
+        pageBg: 'fixed inset-0 z-[-1] bg-[#0F0F0F]',
+        header: 'bg-[#0F0F0F] pt-24 pb-20 px-6 text-center relative overflow-hidden',
         headerGlow: true,
-        logoBox: 'bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white border-transparent shadow-2xl shadow-violet-900',
-        title: 'text-white',
+        logoBox: 'bg-[#1C1C1C] border border-[#BE185D]/30 text-[#BE185D] shadow-2xl shadow-[#BE185D]/10',
+        title: 'text-white tracking-tight font-black',
         subtitle: 'text-zinc-500',
-        card: 'bg-zinc-900 border border-zinc-800 text-white hover:border-violet-600/60 hover:bg-zinc-800/80 shadow-xl shadow-black/20',
-        serviceName: 'text-white',
-        price: 'text-violet-400',
+        card: 'bg-[#1C1C1C] border border-white/5 text-white hover:border-[#BE185D]/50 hover:bg-[#1C1C1C]/80',
+        serviceName: 'text-white font-black uppercase tracking-wider',
+        price: 'text-[#BE185D]',
         meta: 'text-zinc-600',
-        input: 'bg-zinc-900 border-zinc-800 text-white placeholder-zinc-600 focus:border-violet-500',
-        slotBtn: 'bg-zinc-900 text-white hover:bg-violet-700 border-zinc-800',
-        cta: 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:opacity-90 shadow-xl shadow-violet-900/40',
-        badge: 'bg-zinc-900 text-zinc-600 text-[10px] border-zinc-800',
-        backBtn: 'bg-zinc-900 text-zinc-500 hover:bg-zinc-800',
-        summaryCard: 'bg-zinc-900 border-zinc-800',
+        input: 'bg-[#1C1C1C] border-white/5 text-white placeholder-zinc-600 focus:border-[#BE185D]',
+        slotBtn: 'bg-[#1C1C1C] border-white/10 text-white hover:bg-[#BE185D]',
+        cta: 'bg-[#BE185D] text-white hover:bg-[#9D154D]',
+        badge: 'bg-white/5 text-[#BE185D] text-[10px] border border-[#BE185D]/20',
+        backBtn: 'bg-white/5 text-zinc-500 hover:text-white',
+        summaryCard: 'bg-[#1C1C1C] border-[#BE185D]/20',
         footer: 'text-zinc-800',
         label: 'text-zinc-500',
     },
+    pure: {
+        page: 'bg-white text-zinc-900 min-h-screen font-sans',
+        header: 'bg-white pt-20 pb-16 px-6 text-center border-b border-zinc-50',
+        logoBox: 'bg-[#F0FDFA] text-[#14B8A6] border border-[#14B8A6]/20',
+        title: 'text-zinc-900 font-light tracking-tight',
+        subtitle: 'text-zinc-500',
+        card: 'bg-[#F0FDFA] border-none text-zinc-900 hover:bg-white border border-[#14B8A6]/5 hover:shadow-teal-100/50 shadow-none hover:shadow-2xl',
+        serviceName: 'text-zinc-900 font-medium',
+        price: 'text-[#14B8A6] font-bold',
+        meta: 'text-zinc-400',
+        input: 'bg-zinc-50 border-zinc-100 text-zinc-900 placeholder-zinc-400 focus:bg-white focus:border-[#14B8A6]',
+        slotBtn: 'bg-white text-zinc-600 border-teal-100 hover:bg-[#14B8A6] hover:text-white hover:border-[#14B8A6]',
+        cta: 'bg-[#14B8A6] text-white hover:bg-[#0D9488]',
+        badge: 'bg-[#14B8A6]/10 text-[#14B8A6] uppercase tracking-widest text-[9px] font-black',
+        backBtn: 'bg-zinc-50 text-zinc-400 hover:text-teal-600',
+        summaryCard: 'bg-[#F0FDFA] border-[#14B8A6]/10',
+        footer: 'text-zinc-300',
+        label: 'text-zinc-400',
+    },
+    aura: {
+        page: 'bg-white text-zinc-900 min-h-screen font-sans',
+        header: 'bg-gradient-to-b from-[#F5F3FF] to-white pt-24 pb-20 px-6 text-center relative',
+        logoBox: 'bg-white text-[#7C3AED] shadow-xl shadow-violet-100',
+        title: 'text-[#7C3AED] font-black italic tracking-tighter',
+        subtitle: 'text-zinc-500 italic',
+        card: 'bg-white border border-violet-100 text-zinc-900 hover:border-[#7C3AED] hover:shadow-xl hover:shadow-violet-100/30',
+        serviceName: 'text-zinc-900 font-black',
+        price: 'text-[#7C3AED]',
+        meta: 'text-zinc-400',
+        input: 'bg-[#F5F3FF] border-[#F5F3FF] text-zinc-900 placeholder-zinc-400 focus:bg-white focus:border-[#7C3AED]',
+        slotBtn: 'bg-[#F5F3FF] text-[#7C3AED] font-bold hover:bg-[#7C3AED] hover:text-white',
+        cta: 'bg-[#7C3AED] text-white hover:shadow-lg shadow-violet-200',
+        badge: 'bg-violet-600 text-white text-[10px] font-bold',
+        backBtn: 'bg-white shadow-xl text-zinc-300 hover:text-violet-600',
+        summaryCard: 'bg-[#F5F3FF] border-violet-100',
+        footer: 'text-zinc-300',
+        label: 'text-zinc-400',
+    }
 };
 
 export default function PublicHomeUI({ tenant, services, staff }) {
@@ -120,9 +99,21 @@ export default function PublicHomeUI({ tenant, services, staff }) {
 
     const website = tenant.websiteConfig || {};
     const theme = tenant.theme || {};
-    const variant = theme.layoutVariant || 'modern';
-    const primaryColor = theme.colors?.primary || '#4f46e5';
-    const t = THEMES[variant] || THEMES.modern;
+    const variant = theme.layoutVariant || 'glow';
+    const primaryColor = theme.colors?.primary || '#E11D48';
+    const t = THEMES[variant] || THEMES.glow;
+    const radius = theme.borderRadius || '1.75rem';
+
+    // Se o cliente não definiu textos customizados, usamos as sugestões do template
+    const defaultTexts = {
+        glow: { title: 'Sua melhor versão começa aqui.', sub: 'Atendimento premium e agenda online em poucos segundos.' },
+        velvet: { title: 'Beleza refinada com resultados reais.', sub: 'Tratamentos estéticos modernos com profissionais especializados.' },
+        pure: { title: 'Cuidado profissional para sua pele.', sub: 'Tratamentos personalizados para realçar sua beleza natural.' },
+        aura: { title: 'Seu momento de cuidado começa aqui.', sub: 'Serviços de beleza com atendimento exclusivo e resultados incríveis.' },
+    }[variant] || { title: website.heroTitle, sub: website.heroSubtitle };
+
+    const displayTitle = website.heroTitle || defaultTexts.title;
+    const displaySub = website.heroSubtitle || defaultTexts.sub;
 
     useEffect(() => {
         if (step === 3 && booking.staff && booking.service && booking.date) {
@@ -158,8 +149,7 @@ export default function PublicHomeUI({ tenant, services, staff }) {
         }
     };
 
-    const inputClass = `w-full p-4 mt-1 rounded-[1.25rem] border outline-none focus:ring-4 focus:ring-current/10 transition-all font-medium ${t.input}`;
-    const radius = theme.borderRadius || '1.25rem';
+    const inputClass = `w-full p-4 mt-1 border outline-none focus:ring-4 focus:ring-current/10 transition-all font-medium ${t.input}`;
 
     if (bookingDone) return (
         <div className={t.page}>
@@ -179,7 +169,8 @@ export default function PublicHomeUI({ tenant, services, staff }) {
                 </div>
                 <button
                     onClick={() => { setStep(1); setBookingDone(false); setBooking({ service: null, staff: null, date: DateTime.now().toISODate(), time: null }); }}
-                    className={`py-4 px-8 rounded-[${radius}] font-black uppercase tracking-widest text-sm transition-all active:scale-95 ${t.cta}`}
+                    className={`py-4 px-8 font-black uppercase tracking-widest text-sm transition-all active:scale-95 ${t.cta}`}
+                    style={{ borderRadius: radius }}
                 >
                     Fazer Outro Agendamento
                 </button>
@@ -226,10 +217,10 @@ export default function PublicHomeUI({ tenant, services, staff }) {
                         }
                     </div>
                     <h1 className={`text-4xl font-black tracking-tight mb-3 leading-tight ${t.title}`}>
-                        {website.heroTitle || tenant.name}
+                        {displayTitle}
                     </h1>
                     <p className={`text-sm max-w-xs mx-auto opacity-80 ${t.subtitle}`}>
-                        {website.heroSubtitle || 'Especialistas em beleza e estética.'}
+                        {displaySub}
                     </p>
                 </div>
             </header>
@@ -341,7 +332,8 @@ export default function PublicHomeUI({ tenant, services, staff }) {
                             value={booking.date}
                             min={DateTime.now().toISODate()}
                             onChange={e => setBooking({ ...booking, date: e.target.value })}
-                            className={`w-full p-4 rounded-[${radius}] border font-bold text-sm outline-none focus:ring-4 focus:ring-current/10 transition-all ${t.input}`}
+                            className={`w-full p-4 border font-bold text-sm outline-none focus:ring-4 focus:ring-current/10 transition-all ${t.input}`}
+                            style={{ borderRadius: radius }}
                         />
                         {loadingSlots ? (
                             <div className="py-10 text-center space-y-3">
@@ -397,16 +389,17 @@ export default function PublicHomeUI({ tenant, services, staff }) {
                         <form onSubmit={handleBooking} className="space-y-4">
                             <div>
                                 <label className={`text-[10px] font-black uppercase tracking-widest ml-1 ${t.label}`}>Seu Nome</label>
-                                <input name="name" required className={inputClass} placeholder="Como podemos te chamar?" />
+                                <input name="name" required className={inputClass} placeholder="Como podemos te chamar?" style={{ borderRadius: radius }} />
                             </div>
                             <div>
                                 <label className={`text-[10px] font-black uppercase tracking-widest ml-1 ${t.label}`}>WhatsApp</label>
-                                <input name="phone" required className={inputClass} placeholder="(00) 00000-0000" />
+                                <input name="phone" required className={inputClass} placeholder="(00) 00000-0000" style={{ borderRadius: radius }} />
                             </div>
                             <button
                                 type="submit"
                                 disabled={submitting}
-                                className={`w-full py-5 font-black rounded-[${radius}] text-sm uppercase tracking-widest mt-4 active:scale-[0.98] transition-all ${t.cta} ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`w-full py-5 font-black text-sm uppercase tracking-widest mt-4 active:scale-[0.98] transition-all ${t.cta} ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                style={{ borderRadius: radius }}
                             >
                                 {submitting ? 'Confirmando...' : 'Confirmar Agendamento'}
                             </button>

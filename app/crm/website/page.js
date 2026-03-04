@@ -27,59 +27,48 @@ import { cn } from "@/lib/utils";
 
 const TEMPLATES = [
     {
-        id: 'modern',
-        name: 'Moderno',
-        desc: 'Fundo escuro premium com acentos em índigo.',
-        bg: 'bg-zinc-950',
-        card: 'bg-white/5 border-white/10',
-        dot: 'bg-indigo-500',
-        text: 'text-white',
-        sub: 'text-zinc-500',
-        accent: 'bg-indigo-600',
-    },
-    {
-        id: 'glass',
-        name: 'Glassmorphism',
-        desc: 'Efeito vidro e gradiente suave em roxo/rosa.',
-        bg: 'bg-gradient-to-br from-indigo-200 via-purple-100 to-pink-100',
-        card: 'bg-white/50 border-white/60 backdrop-blur',
-        dot: 'bg-indigo-500',
-        text: 'text-zinc-900',
-        sub: 'text-zinc-500',
-        accent: 'bg-indigo-600',
-    },
-    {
-        id: 'minimal',
-        name: 'Minimal',
-        desc: 'Branco puro. Foco no conteúdo.',
+        id: 'glow',
+        name: 'Glow Studio',
+        desc: 'Elegante e feminino. Ideal para lash e estética.',
+        primary: '#E11D48',
         bg: 'bg-white',
-        card: 'bg-white border-zinc-200',
-        dot: 'bg-zinc-900',
-        text: 'text-zinc-900',
-        sub: 'text-zinc-400',
-        accent: 'bg-zinc-900',
+        surface: 'bg-pink-50',
+        radius: '1.75rem', // 28px
+        preview_bg: 'bg-pink-50',
+        preview_accent: 'bg-rose-500',
     },
     {
-        id: 'elegant',
-        name: 'Elegante',
-        desc: 'Tons terrosos e tipografia sofisticada.',
-        bg: 'bg-[#F8F4EF]',
-        card: 'bg-white border-stone-200',
-        dot: 'bg-amber-500',
-        text: 'text-stone-900',
-        sub: 'text-stone-400',
-        accent: 'bg-stone-800',
+        id: 'velvet',
+        name: 'Velvet Beauty',
+        desc: 'Dark luxury e sofisticado. Clínicas de alto padrão.',
+        primary: '#BE185D',
+        bg: 'bg-zinc-950',
+        surface: 'bg-zinc-900',
+        radius: '1.625rem', // 26px
+        preview_bg: 'bg-zinc-950',
+        preview_accent: 'bg-pink-700',
     },
     {
-        id: 'dark',
-        name: 'Dark Mode',
-        desc: 'Preto absoluto com gradiente neon.',
-        bg: 'bg-black',
-        card: 'bg-zinc-900 border-zinc-800',
-        dot: 'bg-violet-500',
-        text: 'text-white',
-        sub: 'text-zinc-600',
-        accent: 'bg-gradient-to-r from-violet-600 to-fuchsia-600',
+        id: 'pure',
+        name: 'Pure Skin',
+        desc: 'Clean e minimalista. Foco em skincare e spa.',
+        primary: '#14B8A6',
+        bg: 'bg-white',
+        surface: 'bg-teal-50',
+        radius: '1.875rem', // 30px
+        preview_bg: 'bg-white',
+        preview_accent: 'bg-teal-500',
+    },
+    {
+        id: 'aura',
+        name: 'Aura Studio',
+        desc: 'Moderno e instagramável. Estúdios criativos.',
+        primary: '#7C3AED',
+        bg: 'bg-white',
+        surface: 'bg-violet-50',
+        radius: '1.5rem', // 24px
+        preview_bg: 'bg-violet-50',
+        preview_accent: 'bg-violet-600',
     },
 ];
 
@@ -92,13 +81,13 @@ export default function WebsiteSettingsPage() {
     const [lastPublished, setLastPublished] = useState(null);
     const [config, setConfig] = useState({
         theme: {
-            colors: { primary: '#4f46e5', secondary: '#18181b' },
-            borderRadius: '1.5rem',
-            layoutVariant: 'modern',
+            colors: { primary: '#E11D48', secondary: '#FCE7F3' },
+            borderRadius: '1.75rem',
+            layoutVariant: 'glow',
         },
         websiteConfig: {
-            heroTitle: '',
-            heroSubtitle: '',
+            heroTitle: 'Sua melhor versão começa aqui.',
+            heroSubtitle: 'Atendimento premium e agenda online em poucos segundos.',
             logoUrl: '',
             heroImageUrl: '',
             showPrices: true,
@@ -158,6 +147,20 @@ export default function WebsiteSettingsPage() {
                 colors: { ...prev.theme.colors, [key]: value }
             }
         }));
+    };
+
+    const handleSelectTemplate = (tmp) => {
+        setHasChanges(true);
+        setConfig(prev => ({
+            ...prev,
+            theme: {
+                ...prev.theme,
+                layoutVariant: tmp.id,
+                borderRadius: tmp.radius,
+                colors: { ...prev.theme.colors, primary: tmp.primary, secondary: tmp.surface.replace('bg-', '#') }
+            }
+        }));
+        toast.success(`Template ${tmp.name} aplicado!`);
     };
 
     const handleSave = async () => {
@@ -286,7 +289,7 @@ export default function WebsiteSettingsPage() {
                                             {TEMPLATES.map(tmp => (
                                                 <button
                                                     key={tmp.id}
-                                                    onClick={() => handleChange('theme', 'layoutVariant', tmp.id)}
+                                                    onClick={() => handleSelectTemplate(tmp)}
                                                     className={cn(
                                                         "p-4 rounded-[1.75rem] border-2 text-left flex items-center gap-5 transition-all group overflow-hidden",
                                                         config.theme.layoutVariant === tmp.id
@@ -298,18 +301,17 @@ export default function WebsiteSettingsPage() {
                                                     <div className={cn("w-20 h-28 rounded-xl shrink-0 overflow-hidden relative border border-zinc-200/20", tmp.bg)}>
                                                         {/* Mock Header */}
                                                         <div className="p-2 flex justify-center">
-                                                            <div className={cn("w-6 h-6 rounded-full", tmp.accent)} />
+                                                            <div className={cn("w-6 h-6 rounded-full", tmp.preview_accent)} />
                                                         </div>
                                                         {/* Mock Title */}
                                                         <div className="px-2 space-y-1">
-                                                            <div className={cn("h-1.5 w-full rounded-full opacity-60", tmp.dot)} />
-                                                            <div className={cn("h-1 w-3/4 rounded-full opacity-30", tmp.sub.replace('text-', 'bg-'))} />
+                                                            <div className={cn("h-1 w-full rounded-full opacity-60", tmp.preview_accent)} />
+                                                            <div className={cn("h-1 w-3/4 rounded-full opacity-20 bg-zinc-400")} />
                                                         </div>
                                                         {/* Mock Cards */}
                                                         <div className="px-2 mt-2 space-y-1.5">
-                                                            {[1, 2].map(i => (
-                                                                <div key={i} className={cn("h-5 rounded-md border", tmp.card)} />
-                                                            ))}
+                                                            <div className={cn("h-3 rounded-md border border-zinc-100 shadow-sm", tmp.surface)} />
+                                                            <div className={cn("h-3 rounded-md border border-zinc-100 shadow-sm", tmp.surface)} />
                                                         </div>
                                                         {/* Active check */}
                                                         {config.theme.layoutVariant === tmp.id && (
