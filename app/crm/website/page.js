@@ -18,7 +18,7 @@ import {
     Search,
     ShieldCheck
 } from "lucide-react";
-import { PageHeader, Input } from "@/app/components/ui/forms";
+import { PageHeader, Input, Badge } from "@/app/components/ui/forms";
 import { Button, Card } from "@/app/components/ui/core";
 import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
@@ -37,6 +37,7 @@ export default function WebsiteSettingsPage() {
     const [activeTab, setActiveTab] = useState('branding');
     const [previewMode, setPreviewMode] = useState('mobile');
     const [hasChanges, setHasChanges] = useState(false);
+    const [lastPublished, setLastPublished] = useState(null);
     const [config, setConfig] = useState({
         theme: {
             colors: { primary: '#4f46e5', secondary: '#18181b' },
@@ -52,6 +53,18 @@ export default function WebsiteSettingsPage() {
         },
         slug: ''
     });
+
+    // Bloquear saída com alterações não salvas
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (hasChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [hasChanges]);
 
     useEffect(() => {
         fetch('/api/crm/website')
@@ -107,6 +120,7 @@ export default function WebsiteSettingsPage() {
         if (res.ok) {
             toast.success("Alterações publicadas com sucesso!");
             setHasChanges(false);
+            setLastPublished(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
         } else {
             toast.error("Ocorreu um erro ao publicar seu site.");
         }
@@ -177,6 +191,21 @@ export default function WebsiteSettingsPage() {
                                                 />
                                                 <div className="flex-1">
                                                     <p className="text-xs font-bold text-zinc-900">{config.theme.colors.primary}</p>
+                                                    <p className="text-[10px] text-zinc-400 uppercase font-black">Hex Code</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest block ml-1">Cor Secundária</label>
+                                            <div className="flex items-center gap-4">
+                                                <input
+                                                    type="color"
+                                                    value={config.theme.colors.secondary || '#18181b'}
+                                                    onChange={e => handleThemeColorChange('secondary', e.target.value)}
+                                                    className="w-14 h-14 rounded-2xl border-4 border-white shadow-lg cursor-pointer overflow-hidden p-0"
+                                                />
+                                                <div className="flex-1">
+                                                    <p className="text-xs font-bold text-zinc-900">{config.theme.colors.secondary || '#18181b'}</p>
                                                     <p className="text-[10px] text-zinc-400 uppercase font-black">Hex Code</p>
                                                 </div>
                                             </div>
@@ -260,6 +289,22 @@ export default function WebsiteSettingsPage() {
                                 </div>
                             )}
 
+                            {activeTab === 'content' && (
+                                <div className="p-10 bg-indigo-50/30 border border-indigo-100 rounded-[2rem] space-y-4">
+                                    <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100 mb-6">
+                                        <Layout className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="text-xl font-black text-zinc-900 tracking-tight">Arquitetura de Conteúdo</h3>
+                                    <p className="text-sm font-medium text-zinc-500 leading-relaxed">
+                                        Esta seção permitirá que você reorganize as vitrines de serviços, galeria de fotos e depoimentos diretamente por aqui.
+                                    </p>
+                                    <div className="pt-4 flex items-center gap-2">
+                                        <Badge variant="indigo">Em breve</Badge>
+                                        <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Disponível na próxima atualização</span>
+                                    </div>
+                                </div>
+                            )}
+
                             {activeTab === 'seo' && (
                                 <div className="space-y-8">
                                     <div className="p-8 bg-zinc-900 text-white rounded-[2rem] space-y-4">
@@ -292,7 +337,9 @@ export default function WebsiteSettingsPage() {
                         ) : (
                             <div className="flex items-center gap-2">
                                 <Check className="w-4 h-4 text-green-500" />
-                                <span className="text-xs font-black text-zinc-400 uppercase tracking-widest">Tudo atualizado</span>
+                                <span className="text-xs font-black text-zinc-400 uppercase tracking-widest">
+                                    {lastPublished ? `Publicado às ${lastPublished}` : 'Tudo atualizado'}
+                                </span>
                             </div>
                         )}
                     </div>
@@ -312,7 +359,7 @@ export default function WebsiteSettingsPage() {
             </div>
 
             {/* Live Preview Panel */}
-            <div className="w-[600px] h-full hidden xl:flex flex-col p-10 bg-[#F4F4F9]">
+            <div className="w-[600px] h-full hidden lg:flex flex-col p-10 bg-[#F4F4F9]">
                 <div className="mb-8 flex justify-between items-center">
                     <div className="flex items-center gap-6">
                         <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400">Preview ao Vivo</h3>
