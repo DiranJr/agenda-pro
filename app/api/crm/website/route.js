@@ -4,22 +4,17 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
 const websiteConfigSchema = z.object({
-    theme: z.object({
-        colors: z.object({
-            primary: z.string().startsWith('#'),
-            secondary: z.string().startsWith('#'),
-        }),
-        borderRadius: z.string().optional(),
-        layoutVariant: z.string().optional(),
-    }),
-    websiteConfig: z.object({
+    templateId: z.string(),
+    customization: z.object({
         heroTitle: z.string().optional(),
         heroSubtitle: z.string().optional(),
-        logoUrl: z.string().url().optional().or(z.literal('')),
-        heroImageUrl: z.string().url().optional().or(z.literal('')),
+        logoUrl: z.string().optional().or(z.literal('')),
+        heroImageUrl: z.string().optional().or(z.literal('')),
+        whatsapp: z.string().optional().or(z.literal('')),
         showPrices: z.boolean().default(true),
-        gallery: z.array(z.string().url()).optional().default([]),
+        galleryUrls: z.array(z.string()).optional().default([]),
     }),
+    isPublished: z.boolean().optional(),
 });
 
 export async function GET(request) {
@@ -28,14 +23,24 @@ export async function GET(request) {
         return NextResponse.json({ error: { code: "UNAUTHORIZED", message: "Tenant nao resolvido" } }, { status: 401 });
     }
 
-    const websiteConfig = (tenant.websiteConfig && typeof tenant.websiteConfig === 'object')
-        ? tenant.websiteConfig
-        : {};
+    // Adapt legacy data if new fields are empty for smooth transition
+    const adaptation = {
+        templateId: tenant.templateId || tenant.theme?.layoutVariant || 'lash-beauty',
+        customization: tenant.customization || {
+            heroTitle: tenant.websiteConfig?.heroTitle || '',
+            heroSubtitle: tenant.websiteConfig?.heroSubtitle || '',
+            logoUrl: tenant.websiteConfig?.logoUrl || '',
+            heroImageUrl: tenant.websiteConfig?.heroImageUrl || '',
+            whatsapp: tenant.websiteConfig?.contactWhatsapp || '',
+            showPrices: tenant.websiteConfig?.showPrices ?? true,
+            galleryUrls: tenant.websiteConfig?.gallery || [],
+        }
+    };
 
     return NextResponse.json({
         tenant: {
             ...tenant,
-            contactPhone: websiteConfig.contactWhatsapp || '',
+            ...adaptation
         }
     });
 }
@@ -55,19 +60,13 @@ export async function PATCH(request) {
             return NextResponse.json({ error: { code: 'INVALID_INPUT', details: result.error.format() } }, { status: 400 });
         }
 
-        const currentTenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
-        const currentWebsiteConfig = (currentTenant?.websiteConfig && typeof currentTenant.websiteConfig === 'object')
-            ? currentTenant.websiteConfig
-            : {};
-
         const updatedTenant = await prisma.tenant.update({
             where: { id: tenantId },
             data: {
-                theme: result.data.theme,
-                websiteConfig: {
-                    ...currentWebsiteConfig,
-                    ...result.data.websiteConfig,
-                },
+                templateId: result.data.templateId,
+                customization: result.data.customization,
+                isPublished: result.data.isPublished ?? true,
+                publishedAt: (result.data.isPublished !== false) ? new Date() : undefined,
             }
         });
 

@@ -11,10 +11,16 @@ import {
     Plus,
     Clock,
     User,
-    MoreVertical
+    MoreVertical,
+    Zap,
+    Users,
+    DollarSign,
+    Target,
+    ArrowUpRight,
+    MessageCircle,
+    Check
 } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { usePathname } from "next/navigation";
 import { PageHeader } from "@/app/components/ui/forms";
 import { Button, Card } from "@/app/components/ui/core";
 import { Badge } from "@/app/components/ui/forms";
@@ -45,165 +51,204 @@ export default function DashboardPage() {
         revenue: appointments.reduce((acc, app) => acc + (app.status !== 'CANCELED' ? Number(app.service?.price || 0) : 0), 0),
         count: appointments.length,
         confirmed: appointments.filter(a => ['CONFIRMED', 'DONE'].includes(a.status)).length,
-        noShows: appointments.filter(a => a.status === 'NO_SHOW').length,
+        pending: appointments.filter(a => a.status === 'PENDING').length,
     };
 
     const confirmationRate = stats.count > 0 ? Math.round((stats.confirmed / stats.count) * 100) : 0;
 
-    return (
-        <div className="max-w-7xl mx-auto space-y-10">
-            <PageHeader
-                title="Visão Geral"
-                subtitle={DateTime.fromISO(date).setLocale("pt-BR").toLocaleString(DateTime.DATE_HUGE)}
-                actions={
-                    <div className="flex gap-4">
-                        <div className="relative">
-                            <input
-                                type="date"
-                                value={date}
-                                onChange={(e) => setDate(e.target.value)}
-                                className="bg-white border border-zinc-200 pl-12 pr-6 py-4 rounded-2xl font-bold text-sm outline-none focus:ring-4 focus:ring-indigo-600/5 transition-all shadow-sm"
-                            />
-                            <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" />
-                        </div>
-                        <Button
-                            onClick={() => window.location.href = '/crm/calendar'}
-                            className="gap-2 active:scale-95 transition-all"
-                        >
-                            <Plus className="w-4 h-4 pointer-events-none" />
-                            Agendar
-                        </Button>
-                    </div>
-                }
-            />
+    const getTimeGreeting = () => {
+        const hour = DateTime.now().hour;
+        if (hour < 12) return "Bom dia";
+        if (hour < 18) return "Boa tarde";
+        return "Boa noite";
+    };
 
-            {/* Metrics Grid */}
+    return (
+        <div className="max-w-7xl mx-auto space-y-12 pb-20 font-sans">
+            {/* Header com Saudação */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <div className="flex items-center gap-2 text-indigo-600 font-black text-xs uppercase tracking-[0.2em] mb-3">
+                        <Zap className="w-4 h-4" /> CRM INTELIGENTE
+                    </div>
+                    <h1 className="text-4xl font-black text-zinc-900 tracking-tight">
+                        {getTimeGreeting()}, <span className="text-indigo-600">Admin</span>
+                    </h1>
+                    <p className="text-zinc-400 font-medium mt-2">Veja como está o desempenho do seu negócio hoje.</p>
+                </div>
+
+                <div className="flex items-center gap-3 bg-white p-2 rounded-[2rem] shadow-sm border border-zinc-100">
+                    <div className="relative">
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="bg-zinc-50 border-none pl-12 pr-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest outline-none focus:ring-2 focus:ring-indigo-600/10 transition-all"
+                        />
+                        <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+                    </div>
+                    <Button
+                        onClick={() => window.location.href = '/crm/calendar'}
+                        className="rounded-2xl h-12 px-6 shadow-lg shadow-indigo-100 text-xs font-black uppercase tracking-widest"
+                    >
+                        <Plus className="w-4 h-4 mr-2" /> Novo Agendamento
+                    </Button>
+                </div>
+            </div>
+
+            {/* Metrics Grid V2 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                    { label: 'Faturamento', value: `R$ ${stats.revenue.toFixed(2)}`, color: 'indigo', icon: TrendingUp },
-                    { label: 'Agendamentos', value: stats.count, color: 'zinc', icon: CalendarIcon },
-                    { label: 'Confirmação', value: `${confirmationRate}%`, color: 'green', icon: CheckCircle2 },
-                    { label: 'No-Shows', value: stats.noShows, color: 'red', icon: AlertTriangle },
+                    { label: 'Faturamento', value: `R$ ${stats.revenue.toFixed(2)}`, sub: '+12% vs ontem', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                    { label: 'Agendamentos', value: stats.count, sub: '8 ocupados', icon: CalendarIcon, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+                    { label: 'Confirmação', value: `${confirmationRate}%`, sub: 'Taxa de sucesso', icon: Target, color: 'text-violet-600', bg: 'bg-violet-50' },
+                    { label: 'Novos Clientes', value: '4', sub: 'Esta semana', icon: Users, color: 'text-amber-600', bg: 'bg-amber-50' },
                 ].map((stat, i) => (
-                    <Card key={i} className="flex items-center gap-6 group hover:border-indigo-200 transition-all">
-                        <div className={cn(
-                            "w-16 h-16 rounded-[1.25rem] flex items-center justify-center transition-colors shadow-sm",
-                            stat.color === 'indigo' && "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white",
-                            stat.color === 'red' && "bg-red-50 text-red-600",
-                            stat.color === 'green' && "bg-green-50 text-green-600",
-                            stat.color === 'zinc' && "bg-zinc-50 text-zinc-600",
-                        )}>
-                            <stat.icon className="w-7 h-7" />
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-1">{stat.label}</p>
-                            <p className="text-2xl font-black text-zinc-900">{stat.value}</p>
+                    <Card key={i} padding="p-8" className="relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+                        <div className={cn("absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full opacity-10 transition-transform group-hover:scale-110", stat.bg)} />
+                        <div className="relative z-10 space-y-6">
+                            <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner", stat.bg, stat.color)}>
+                                <stat.icon className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-3xl font-black text-zinc-900 tracking-tighter">{stat.value}</h3>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mt-1">{stat.label}</p>
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 bg-emerald-50/50 w-fit px-2 py-1 rounded-full">
+                                <ArrowUpRight className="w-3 h-3" /> {stat.sub}
+                            </div>
                         </div>
                     </Card>
                 ))}
             </div>
 
-            <Card padding="p-0 overflow-hidden">
-                <div className="p-10 border-b border-zinc-50 flex justify-between items-center bg-zinc-50/20">
-                    <div className="flex items-center gap-4">
-                        <div className="w-2 h-8 bg-indigo-600 rounded-full" />
-                        <h2 className="text-xl font-black tracking-tight">Agenda do Dia</h2>
+            {/* Main Content Area */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                {/* Timeline / Agenda */}
+                <div className="lg:col-span-2 space-y-6">
+                    <div className="flex items-center justify-between px-2">
+                        <h2 className="text-xl font-black text-zinc-900 tracking-tight flex items-center gap-3">
+                            <Clock className="w-5 h-5 text-indigo-600" /> Agenda do Dia
+                        </h2>
+                        <button className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:underline">Ver Calendário Completo</button>
                     </div>
-                    <Button
-                        onClick={() => toast.success("Relatório sendo gerado...")}
-                        variant="ghost"
-                        size="sm"
-                        className="gap-2"
-                    >
-                        <Download className="w-4 h-4 pointer-events-none" />
-                        Exportar Relatório
-                    </Button>
+
+                    <Card padding="p-0 overflow-hidden">
+                        <div className="divide-y divide-zinc-50">
+                            {loading ? (
+                                <div className="py-24 text-center">
+                                    <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                                    <p className="text-zinc-400 font-bold uppercase tracking-widest italic animate-pulse text-xs">Sincronizando...</p>
+                                </div>
+                            ) : appointments.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-32 text-center p-10">
+                                    <div className="w-20 h-20 bg-zinc-50 rounded-[2.5rem] flex items-center justify-center mb-6 border border-zinc-100">
+                                        <CalendarIcon className="w-8 h-8 text-zinc-200" />
+                                    </div>
+                                    <h3 className="text-lg font-black text-zinc-900">Nenhum compromisso</h3>
+                                    <p className="text-zinc-400 text-sm font-medium mt-2 max-w-[240px]">Aproveite para organizar suas finanças ou captar novos clientes.</p>
+                                </div>
+                            ) : (
+                                appointments.map((app) => (
+                                    <div key={app.id} className="group flex flex-col md:flex-row md:items-center p-8 hover:bg-zinc-50/50 transition-all relative gap-6">
+                                        <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-600 opacity-0 group-hover:opacity-100 transition-all" />
+
+                                        <div className="w-32 shrink-0">
+                                            <div className="text-2xl font-black text-zinc-900 flex items-center gap-2">
+                                                {DateTime.fromISO(app.startTime).toFormat("HH:mm")}
+                                            </div>
+                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-1">Check-in</p>
+                                        </div>
+
+                                        <div className="flex-1 space-y-2">
+                                            <div className="flex items-center gap-3">
+                                                <h3 className="font-black text-xl text-zinc-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{app.customer.name}</h3>
+                                                {app.status === 'CONFIRMED' && <Badge variant="indigo" className="h-5 px-2 text-[9px]">Confirmado</Badge>}
+                                                {app.status === 'PENDING' && <Badge variant="warning" className="h-5 px-2 text-[9px]">Pendente</Badge>}
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-y-2 gap-x-6">
+                                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                                                    <div className="w-2 h-2 rounded-full bg-indigo-500" /> {app.service.name}
+                                                </div>
+                                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                                                    <User className="w-3 h-3" /> {app.staff.name}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between md:justify-end gap-8 border-t md:border-t-0 pt-6 md:pt-0">
+                                            <div className="text-right">
+                                                <div className="text-xl font-black text-zinc-900">R$ {parseFloat(app.service.price).toFixed(2)}</div>
+                                                <div className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Procedimento</div>
+                                            </div>
+
+                                            <div className="flex gap-2">
+                                                <Button size="icon" variant="ghost" className="w-12 h-12 rounded-2xl bg-zinc-50 text-zinc-400 hover:bg-green-500 hover:text-white transition-all shadow-sm">
+                                                    <Check className="w-5 h-5" />
+                                                </Button>
+                                                <Button size="icon" variant="ghost" className="w-12 h-12 rounded-2xl bg-zinc-50 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-all shadow-sm">
+                                                    <MessageCircle className="w-5 h-5" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </Card>
                 </div>
 
-                <div className="divide-y divide-zinc-50">
-                    {loading ? (
-                        <div className="py-24 text-center">
-                            <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                            <p className="text-zinc-400 font-bold uppercase tracking-widest italic animate-pulse">Sincronizando agenda...</p>
-                        </div>
-                    ) : appointments.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-32 text-center">
-                            <div className="w-24 h-24 bg-zinc-50 rounded-[2.5rem] flex items-center justify-center mb-8 border border-zinc-100 shadow-inner">
-                                <CalendarIcon className="w-10 h-10 text-zinc-200" />
+                {/* Sidebar: Meta do Mês / Quick Stats */}
+                <div className="space-y-10">
+                    <section className="space-y-6">
+                        <h2 className="text-xl font-black text-zinc-900 tracking-tight px-2">Meta Financeira</h2>
+                        <Card padding="p-8" className="bg-zinc-900 text-white border-none shadow-2xl relative overflow-hidden">
+                            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-600 rounded-full blur-[60px] opacity-20" />
+                            <div className="relative z-10 space-y-8">
+                                <div className="flex justify-between items-center">
+                                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Março 2026</div>
+                                    <Badge variant="indigo" className="bg-indigo-500/20 text-white border-indigo-500/30">72%</Badge>
+                                </div>
+                                <div>
+                                    <p className="text-4xl font-black tracking-tighter">R$ 12.450</p>
+                                    <p className="text-zinc-500 text-xs mt-1">Sua meta é R$ 18.000</p>
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                                        <div className="h-full bg-gradient-to-r from-indigo-600 to-violet-600 w-[72%] rounded-full" />
+                                    </div>
+                                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                                        <span>Progresso</span>
+                                        <span className="text-white">Faltam R$ 5.550</span>
+                                    </div>
+                                </div>
+                                <Button className="w-full bg-white text-black hover:bg-zinc-200 h-12 rounded-2xl text-xs font-black uppercase tracking-widest">Baixar Relatório</Button>
                             </div>
-                            <h3 className="text-xl font-black text-zinc-900 mb-2">Um dia tranquilo à frente</h3>
-                            <p className="text-zinc-500 font-medium max-w-xs mx-auto">Não há agendamentos para esta data. Que tal abrir novos horários ou entrar em contato com clientes?</p>
-                            <Button
-                                onClick={() => window.location.href = '/crm/settings'}
-                                variant="outline"
-                                className="mt-8"
-                            >
-                                Abrir Agenda
-                            </Button>
+                        </Card>
+                    </section>
+
+                    <section className="space-y-6">
+                        <h2 className="text-xl font-black text-zinc-900 tracking-tight px-2">Captar Clientes</h2>
+                        <div className="grid gap-4">
+                            {[
+                                { title: 'Lembrete de Retorno', desc: '5 clientes não voltam há 30 dias.', action: 'Enviar Whats', icon: MessageCircle },
+                                { title: 'Vagas na Agenda', desc: 'Sua tarde de quinta está vazia.', action: 'Criar Promo', icon: Zap },
+                            ].map((item, i) => (
+                                <Card key={i} padding="p-6" className="flex items-start gap-4 hover:border-indigo-100 transition-all cursor-pointer">
+                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                                        <item.icon className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black text-zinc-900 uppercase tracking-tight">{item.title}</h4>
+                                        <p className="text-xs text-zinc-500 font-medium mt-1">{item.desc}</p>
+                                        <button className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-3 hover:underline">{item.action}</button>
+                                    </div>
+                                </Card>
+                            ))}
                         </div>
-                    ) : (
-                        appointments.map((app) => (
-                            <div key={app.id} className="group flex items-center p-8 hover:bg-zinc-50/50 transition-all relative">
-                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600 opacity-0 group-hover:opacity-100 transition-all" />
-
-                                <div className="w-40 border-r border-zinc-100 pr-10 shrink-0">
-                                    <div className="flex items-center gap-2 text-zinc-900 font-black text-2xl mb-1">
-                                        <Clock className="w-5 h-5 text-indigo-600" />
-                                        {DateTime.fromISO(app.startTime).toFormat("HH:mm")}
-                                    </div>
-                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Início do atendimento</p>
-                                </div>
-
-                                <div className="flex-1 px-10">
-                                    <div className="flex items-center gap-4 mb-3">
-                                        <h3 className="font-black text-xl text-zinc-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{app.customer.name}</h3>
-                                        <div className="flex gap-2">
-                                            {app.customer.tags?.includes('VIP') && <Badge variant="indigo">VIP</Badge>}
-                                            {app.customer.noShows > 1 && <Badge variant="danger">Alto Risco</Badge>}
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-8">
-                                        <div className="flex items-center gap-2 text-sm font-bold text-zinc-500">
-                                            <div className="w-3 h-3 rounded-full bg-indigo-400" />
-                                            {app.service.name}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm font-bold text-zinc-400">
-                                            <User className="w-4 h-4" />
-                                            {app.staff.name}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-10">
-                                    <div className="text-right">
-                                        <div className="text-2xl font-black text-zinc-900 mb-0.5">R$ {parseFloat(app.service.price).toFixed(2)}</div>
-                                        <div className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Procedimento</div>
-                                    </div>
-
-                                    <div className="flex gap-2">
-                                        <a
-                                            href={`https://wa.me/${app.customer.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá ${app.customer.name}! Sou do Studio Josy Silva e gostaria de confirmar seu horário hoje às ${DateTime.fromISO(app.startTime).toFormat("HH:mm")}.`)}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="w-14 h-14 flex items-center justify-center bg-green-50 text-green-600 rounded-2xl hover:bg-green-600 hover:text-white transition-all shadow-sm border border-green-100"
-                                        >
-                                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.94 3.659 1.437 5.63 1.438h.004c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                                            </svg>
-                                        </a>
-                                        <button
-                                            onClick={() => toast.success("Ações extras em breve...")}
-                                            className="w-14 h-14 flex items-center justify-center bg-zinc-50 text-zinc-400 rounded-2xl hover:bg-zinc-100 transition-all border border-zinc-100 active:scale-95"
-                                        >
-                                            <MoreVertical className="w-5 h-5 pointer-events-none" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
+                    </section>
                 </div>
-            </Card>
+            </div>
         </div>
     );
 }

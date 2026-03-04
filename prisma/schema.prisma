@@ -31,9 +31,15 @@ model Tenant {
   timezone         String   @default("UTC")
   slotStep         Int      @default(30) // em minutos (slot de agenda)
   
-  // Configurações do mini site (JSON para flexibilidade inicial)
-  websiteConfig    Json?    // { heroTitle, heroSubtitle, aboutText, contactWhatsapp, showPrices }
-  theme            Json?    // { colors: { primary, secondary }, logoUrl, bannerUrl, borderRadius, layoutPreset }
+  // Configurações do mini site
+  templateId       String   @default("lash-beauty")
+  customization    Json?    // { logoUrl, heroTitle, heroSubtitle, galleryUrls[], whatsapp, showPrices }
+  publishedAt      DateTime?
+  isPublished      Boolean  @default(false)
+
+  // Campos legados (manter por compatibilidade durante transição)
+  websiteConfig    Json?    
+  theme            Json?    
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -47,6 +53,26 @@ model Tenant {
   users            User[]
 
   @@index([slug])
+}
+
+model TemplateConfig {
+  id              String   @id
+  name            String   
+  description     String
+  category        String   
+  primaryColor    String   
+  secondaryColor  String   
+  accentColor     String?
+  fontPrimary     String   @default("Inter")
+  fontSecondary   String   @default("Playfair Display")
+  borderRadius    String   @default("16px")
+  layoutStyle     String   
+  
+  defaultTitle    String
+  defaultSubtitle String
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model User {
