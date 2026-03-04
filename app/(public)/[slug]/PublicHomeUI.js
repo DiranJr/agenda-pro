@@ -103,9 +103,23 @@ export default function PublicHomeUI({ tenant, services, staff }) {
                 </div>
             </header>
 
-            <div className="p-6">
+            <div className="p-6 space-y-10">
                 {step === 1 && (
-                    <div className="space-y-6">
+                    <div className="space-y-10">
+                        {/* Gallery Section */}
+                        {website.gallery && website.gallery.length > 0 && (
+                            <div className="space-y-4">
+                                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Nosso Trabalho</h2>
+                                <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6 pb-2">
+                                    {website.gallery.map((url, i) => (
+                                        <div key={i} className="min-w-[260px] aspect-[4/5] rounded-[2rem] overflow-hidden border border-white/20 shadow-xl group">
+                                            <img src={url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Trabalho realizado" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex justify-between items-end mb-2">
                             <h2 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Procedimentos & Serviços</h2>
                         </div>

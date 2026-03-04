@@ -8,7 +8,6 @@ import {
     Type,
     Eye,
     Save,
-    RotateCcr,
     Check,
     Laptop,
     Smartphone,
@@ -16,7 +15,9 @@ import {
     ChevronRight,
     Sparkles,
     Search,
-    ShieldCheck
+    ShieldCheck,
+    Plus,
+    Trash2
 } from "lucide-react";
 import { PageHeader, Input, Badge } from "@/app/components/ui/forms";
 import { Button, Card } from "@/app/components/ui/core";
@@ -50,6 +51,7 @@ export default function WebsiteSettingsPage() {
             logoUrl: '',
             heroImageUrl: '',
             showPrices: true,
+            gallery: [],
         },
         slug: ''
     });
@@ -137,6 +139,7 @@ export default function WebsiteSettingsPage() {
     const tabs = [
         { id: 'branding', label: 'Identidade', icon: Palette },
         { id: 'hero', label: 'Capa / Hero', icon: ImageIcon },
+        { id: 'gallery', label: 'Galeria', icon: ImageIcon },
         { id: 'content', label: 'Conteúdo', icon: Layout },
         { id: 'seo', label: 'SEO / Google', icon: Search },
     ];
@@ -253,6 +256,59 @@ export default function WebsiteSettingsPage() {
                                             ))}
                                         </div>
                                     </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'gallery' && (
+                                <div className="space-y-8">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest block ml-1">Fotos do seu Trabalho</label>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-8 py-0 px-3 text-[10px] font-black uppercase tracking-widest gap-2"
+                                            onClick={() => {
+                                                const url = prompt("Cole a URL da imagem:");
+                                                if (url) {
+                                                    handleChange('websiteConfig', 'gallery', [...config.websiteConfig.gallery, url]);
+                                                }
+                                            }}
+                                        >
+                                            <Plus className="w-3 h-3" />
+                                            Adicionar Foto
+                                        </Button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {(config.websiteConfig.gallery || []).map((url, index) => (
+                                            <div key={index} className="relative group aspect-square rounded-[1.5rem] overflow-hidden border border-zinc-100 bg-zinc-50 shadow-sm transition-all hover:shadow-md">
+                                                <img src={url} className="w-full h-full object-cover" />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <button
+                                                        onClick={() => {
+                                                            const newGallery = config.websiteConfig.gallery.filter((_, i) => i !== index);
+                                                            handleChange('websiteConfig', 'gallery', newGallery);
+                                                        }}
+                                                        className="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {(config.websiteConfig.gallery || []).length === 0 && (
+                                            <div className="col-span-2 p-12 bg-zinc-50 rounded-[2rem] border-2 border-dashed border-zinc-200 flex flex-col items-center gap-4 text-center">
+                                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-zinc-300 shadow-sm">
+                                                    <ImageIcon className="w-6 h-6" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-black text-zinc-900 uppercase tracking-widest">Sua galeria está vazia</p>
+                                                    <p className="text-[10px] font-medium text-zinc-400 mt-1 uppercase tracking-tight">Mostre o seu melhor trabalho para converter mais clientes.</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest leading-relaxed pt-4 border-t border-zinc-50">Dica: Use URLs de imagens do Instagram, Unsplash ou qualquer link público direto. Em breve: upload nativo.</p>
                                 </div>
                             )}
 

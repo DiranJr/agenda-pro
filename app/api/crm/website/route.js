@@ -18,6 +18,7 @@ const websiteConfigSchema = z.object({
         logoUrl: z.string().url().optional().or(z.literal('')),
         heroImageUrl: z.string().url().optional().or(z.literal('')),
         showPrices: z.boolean().default(true),
+        gallery: z.array(z.string().url()).optional().default([]),
     }),
 });
 
