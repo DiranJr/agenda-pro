@@ -1,8 +1,11 @@
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
     console.log('Seeding initial data...');
+
+    const hashedPassword = await bcrypt.hash('abracadabra', 10);
 
     const tenant = await prisma.tenant.upsert({
         where: { slug: 'studio-josy' },
@@ -23,6 +26,18 @@ async function main() {
                 },
             }
         },
+    });
+
+    // Criar Usuário Admin
+    await prisma.user.upsert({
+        where: { email: 'admin@agendapro.com' },
+        update: { password: hashedPassword },
+        create: {
+            email: 'admin@agendapro.com',
+            password: hashedPassword,
+            name: 'Administrador',
+            tenantId: tenant.id
+        }
     });
 
     const location = await prisma.location.create({

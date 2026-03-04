@@ -1,5 +1,7 @@
-import { NextResponse } from "next/server";
+import { apiResponse, apiError } from "@/lib/response";
 import { generateAccessToken, generateRefreshToken } from "@/domains/auth/auth.service";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -13,48 +15,51 @@ export async function POST(request) {
         const result = loginSchema.safeParse(body);
 
         if (!result.success) {
-            return NextResponse.json(
-                { error: { code: 'INVALID_INPUT', message: 'Dados inválidos', details: result.error.format() } },
-                { status: 400 }
-            );
+            return apiError('INVALID_INPUT', result.error.format());
         }
 
-        // Mock bypass para desenvolvimento inicial
-        // Em produção, verificaríamos no Prisma com hash seguro (bcrypt/argon2)
         const { email, password } = result.data;
 
-        if (email === "admin@agendapro.com" && password === "abracadabra") {
-            const payload = { userId: "user_123", tenantId: "tenant_123" };
-            const accessToken = generateAccessToken(payload);
-            const refreshToken = generateRefreshToken(payload);
+        // 1. Buscar usuário no banco
+        const user = await prisma.user.findUnique({
+            where: { email }
+        });
 
-            const response = NextResponse.json({ success: true });
-
-            response.cookies.set('access_token', accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                maxAge: 15 * 60, // 15m
-            });
-
-            response.cookies.set('refresh_token', refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                maxAge: 7 * 24 * 60 * 60, // 7d
-            });
-
-            return response;
+        if (!user) {
+            return apiError('UNAUTHORIZED', null, 'Credenciais inválidas');
         }
 
-        return NextResponse.json(
-            { error: { code: 'UNAUTHORIZED', message: 'Credenciais inválidas' } },
-            { status: 401 }
-        );
+        // 2. Verificar senha com bcrypt
+        const isValid = await bcrypt.compare(password, user.password);
+
+        if (!isValid) {
+            return apiError('UNAUTHORIZED', null, 'Credenciais inválidas');
+        }
+
+        // 3. Gerar tokens
+        const payload = { userId: user.id, tenantId: user.tenantId };
+        const accessToken = generateAccessToken(payload);
+        const refreshToken = generateRefreshToken(payload);
+
+        const response = apiResponse({ success: true });
+
+        response.cookies.set('access_token', accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 15 * 60,
+        });
+
+        response.cookies.set('refresh_token', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60,
+        });
+
+        return response;
     } catch (error) {
-        return NextResponse.json(
-            { error: { code: 'SERVER_ERROR', message: 'Erro interno no servidor' } },
-            { status: 500 }
-        );
+        console.error('Login Error:', error);
+        return apiError('SERVER_ERROR');
     }
 }
