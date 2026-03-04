@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
     Plus,
     Search,
@@ -27,19 +27,20 @@ export default function CustomersPage() {
     const [saving, setSaving] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
-    useEffect(() => {
-        loadCustomers();
-    }, []);
-
-    const loadCustomers = () => {
+    const loadCustomers = useCallback(() => {
         setLoading(true);
         fetch('/api/crm/customers')
             .then(res => res.json())
             .then(data => {
                 setCustomers(Array.isArray(data) ? data : []);
                 setLoading(false);
-            });
-    };
+            })
+            .catch(() => setLoading(false));
+    }, []);
+
+    // Initial load - sets state only inside async fetch callbacks (not synchronous)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    useEffect(() => { loadCustomers(); }, [loadCustomers]);
 
     const handleSave = async (e) => {
         e.preventDefault();

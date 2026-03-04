@@ -75,11 +75,12 @@ export default function WebsiteSettingsPage() {
             .then(data => {
                 if (data.tenant) {
                     const tenant = data.tenant;
-                    setConfig({
-                        theme: tenant.theme || config.theme,
-                        websiteConfig: tenant.websiteConfig || config.websiteConfig,
+                    setConfig(prev => ({
+                        ...prev,
+                        theme: tenant.theme || prev.theme,
+                        websiteConfig: tenant.websiteConfig || prev.websiteConfig,
                         slug: tenant.slug
-                    });
+                    }));
                 }
                 setLoading(false);
             })
@@ -278,7 +279,8 @@ export default function WebsiteSettingsPage() {
                                     <div className="grid grid-cols-2 gap-4">
                                         {(config.websiteConfig.gallery || []).map((url, index) => (
                                             <div key={index} className="relative group aspect-square rounded-[1.5rem] overflow-hidden border border-zinc-100 bg-zinc-50 shadow-sm transition-all hover:shadow-md">
-                                                <img src={url} className="w-full h-full object-cover" />
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={url} alt={`Foto da galeria ${index + 1}`} className="w-full h-full object-cover" />
                                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                     <button
                                                         onClick={() => {
@@ -337,7 +339,8 @@ export default function WebsiteSettingsPage() {
                                     </div>
                                     <div className="p-6 bg-zinc-50 rounded-2xl border border-dashed border-zinc-200 text-center">
                                         {config.websiteConfig.heroImageUrl ? (
-                                            <img src={config.websiteConfig.heroImageUrl} className="h-32 w-full object-cover rounded-xl shadow-sm" />
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img src={config.websiteConfig.heroImageUrl} alt="Imagem de capa do site" className="h-32 w-full object-cover rounded-xl shadow-sm" />
                                         ) : (
                                             <div className="flex flex-col items-center gap-2 py-4">
                                                 <ImageIcon className="w-8 h-8 text-zinc-300" />

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { DateTime, Info } from "luxon";
 import {
     ChevronLeft,
@@ -27,11 +27,7 @@ export default function CalendarPage() {
 
     const weekDays = Array.from({ length: 7 }, (_, i) => viewDate.plus({ days: i }));
 
-    useEffect(() => {
-        loadEvents();
-    }, [viewDate]);
-
-    async function loadEvents() {
+    const loadEvents = useCallback(async () => {
         setLoading(true);
         try {
             const start = viewDate.toISODate();
@@ -44,7 +40,11 @@ export default function CalendarPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [viewDate]);
+
+    useEffect(() => {
+        loadEvents();
+    }, [loadEvents]);
 
     const nextWeek = () => setViewDate(prev => prev.plus({ weeks: 1 }));
     const prevWeek = () => setViewDate(prev => prev.minus({ weeks: 1 }));
