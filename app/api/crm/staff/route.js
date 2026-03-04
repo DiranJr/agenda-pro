@@ -7,7 +7,8 @@ const staffSchema = z.object({
     name: z.string().min(1),
     phone: z.string().optional(),
     status: z.enum(['ACTIVE', 'INACTIVE']).default('ACTIVE'),
-    locationId: z.string().optional(),
+    locationId: z.string().optional().nullable(),
+    serviceIds: z.array(z.string()).optional(),
 });
 
 export const GET = withTenant(async (request, { db }) => {
@@ -25,9 +26,17 @@ export const POST = withTenant(async (request, { db }) => {
             return apiError('INVALID_INPUT', result.error.format());
         }
 
+        const { serviceIds, ...staffData } = result.data;
+
         const repo = new StaffRepository(db.tenantId);
-        const member = await repo.create(result.data);
-        return apiResponse(member, 201);
+        const member = await repo.create(staffData);
+
+        if (serviceIds) {
+            await repo.setServices(member.id, serviceIds);
+        }
+
+        const created = await repo.getById(member.id);
+        return apiResponse(created, 201);
     } catch (err) {
         return apiError('SERVER_ERROR', null, err.message);
     }

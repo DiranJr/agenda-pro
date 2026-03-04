@@ -10,6 +10,7 @@ import {
     MoreHorizontal,
     Search,
     SlidersHorizontal,
+    Save,
     X
 } from "lucide-react";
 import { PageHeader, Input, Badge } from "@/app/components/ui/forms";
@@ -78,9 +79,9 @@ export default function ServicesPage() {
         }
     };
 
-    const filteredServices = services.filter(s =>
-        s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.category?.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredServices = (services || []).filter(s =>
+        (s.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (s.category || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -99,7 +100,7 @@ export default function ServicesPage() {
             {/* Filters Bar */}
             <Card padding="p-6" className="flex flex-col md:flex-row gap-6 items-center">
                 <div className="relative flex-1 w-full">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300 pointer-events-none" />
                     <input
                         type="text"
                         placeholder="Buscar por nome ou categoria..."
@@ -166,7 +167,7 @@ export default function ServicesPage() {
                                     </div>
                                     <div className="flex items-center gap-2 text-zinc-900">
                                         <span className="text-xs font-black uppercase tracking-widest text-zinc-400">R$</span>
-                                        <span className="text-xl font-black tracking-tighter">{parseFloat(service.price).toFixed(2)}</span>
+                                        <span className="text-xl font-black tracking-tighter">{parseFloat(service.price || 0).toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>

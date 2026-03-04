@@ -120,7 +120,7 @@ export default function StaffPage() {
                     <Card key={member.id} className="group hover:border-indigo-200 transition-all flex flex-col pt-10">
                         <div className="relative mb-8 text-center">
                             <div className="w-24 h-24 bg-zinc-50 rounded-full border-4 border-white shadow-xl mx-auto flex items-center justify-center text-3xl font-black text-zinc-300 relative group-hover:scale-105 transition-transform">
-                                {member.name[0]}
+                                {member.name?.[0] || '?'}
                                 <div className={cn(
                                     "absolute bottom-0 right-0 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center text-white",
                                     member.status === 'ACTIVE' ? "bg-green-500" : "bg-zinc-300"

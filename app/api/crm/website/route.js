@@ -27,7 +27,17 @@ export async function GET(request) {
     if (error || !tenant) {
         return NextResponse.json({ error: { code: "UNAUTHORIZED", message: "Tenant nao resolvido" } }, { status: 401 });
     }
-    return NextResponse.json({ tenant });
+
+    const websiteConfig = (tenant.websiteConfig && typeof tenant.websiteConfig === 'object')
+        ? tenant.websiteConfig
+        : {};
+
+    return NextResponse.json({
+        tenant: {
+            ...tenant,
+            contactPhone: websiteConfig.contactWhatsapp || '',
+        }
+    });
 }
 
 export async function PATCH(request) {
@@ -45,11 +55,19 @@ export async function PATCH(request) {
             return NextResponse.json({ error: { code: 'INVALID_INPUT', details: result.error.format() } }, { status: 400 });
         }
 
+        const currentTenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
+        const currentWebsiteConfig = (currentTenant?.websiteConfig && typeof currentTenant.websiteConfig === 'object')
+            ? currentTenant.websiteConfig
+            : {};
+
         const updatedTenant = await prisma.tenant.update({
             where: { id: tenantId },
             data: {
                 theme: result.data.theme,
-                websiteConfig: result.data.websiteConfig,
+                websiteConfig: {
+                    ...currentWebsiteConfig,
+                    ...result.data.websiteConfig,
+                },
             }
         });
 

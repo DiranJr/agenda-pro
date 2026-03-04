@@ -8,7 +8,7 @@ const updateCustomerSchema = z.object({
     phone: z.string().min(1).optional(),
     email: z.string().email().optional().or(z.literal('')).nullable(),
     noShows: z.number().int().nonnegative().optional(),
-    tags: z.array(z.string()).optional(),
+    tags: z.array(z.string()).or(z.string()).optional(),
 });
 
 export const PATCH = withTenant(async (request, { params, db }) => {

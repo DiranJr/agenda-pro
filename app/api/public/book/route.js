@@ -3,6 +3,7 @@ import { getRequestContext } from "@/lib/context";
 import { AppointmentsRepository } from "@/domains/appointments/appointments.repository";
 import { CustomersRepository } from "@/domains/customers/customers.repository";
 import { ServicesRepository } from "@/domains/services/services.repository";
+import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { DateTime } from "luxon";
 
@@ -34,7 +35,6 @@ export async function POST(request) {
 
         const tenantId = tenant.id;
 
-        // 1. Garantir existência do cliente (Multi-tenant isolation)
         const customerRepo = new CustomersRepository(tenantId);
         let customer = await prisma.customer.findFirst({
             where: { phone: customerData.phone, tenantId }
@@ -44,14 +44,15 @@ export async function POST(request) {
             customer = await customerRepo.create(customerData);
         }
 
-        // 2. Validar disponibilidade (reusando lógica do CRM)
         const serviceRepo = new ServicesRepository(tenantId);
         const service = await serviceRepo.getById(serviceId);
+        if (!service) {
+            return NextResponse.json({ error: "Service not found" }, { status: 404 });
+        }
 
         const start = DateTime.fromISO(`${date}T${time}`, { zone: timezone });
         const end = start.plus({ minutes: service.duration });
 
-        // Buffers para conflito
         const startWithBuffer = start.minus({ minutes: service.bufferBefore });
         const endWithBuffer = end.plus({ minutes: service.bufferAfter });
 
@@ -59,11 +60,13 @@ export async function POST(request) {
         const hasConflict = await appRepo.hasConflict(staffId, startWithBuffer.toJSDate(), endWithBuffer.toJSDate());
 
         if (hasConflict) {
-            return NextResponse.json({ error: "Horário não mais disponível." }, { status: 409 });
+            return NextResponse.json({ error: "Horario nao mais disponivel." }, { status: 409 });
         }
 
-        // 3. Criar agendamento (Location padrão por enquanto)
         const location = await prisma.location.findFirst({ where: { tenantId } });
+        if (!location) {
+            return NextResponse.json({ error: "Location not found" }, { status: 404 });
+        }
 
         const appointment = await appRepo.create({
             startTime: start.toJSDate(),

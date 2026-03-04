@@ -25,9 +25,21 @@ export async function PATCH(request) {
             return NextResponse.json({ error: { code: 'INVALID_INPUT', details: result.error.format() } }, { status: 400 });
         }
 
+        const { contactPhone, ...tenantData } = result.data;
+        const currentTenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
+        const websiteConfig = (currentTenant?.websiteConfig && typeof currentTenant.websiteConfig === 'object')
+            ? currentTenant.websiteConfig
+            : {};
+
         const updatedTenant = await prisma.tenant.update({
             where: { id: tenantId },
-            data: result.data
+            data: {
+                ...tenantData,
+                websiteConfig: {
+                    ...websiteConfig,
+                    contactWhatsapp: contactPhone || '',
+                },
+            }
         });
 
         return NextResponse.json(updatedTenant);

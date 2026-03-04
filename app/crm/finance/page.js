@@ -13,11 +13,13 @@ import {
     Users,
     Scissors,
     Wallet,
-    ArrowRight
+    ArrowRight,
+    Plus
 } from "lucide-react";
 import { PageHeader } from "@/app/components/ui/forms";
 import { Button, Card } from "@/app/components/ui/core";
 import { Badge } from "@/app/components/ui/forms";
+import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 
 export default function FinancePage() {
@@ -72,12 +74,19 @@ export default function FinancePage() {
                 subtitle="Monitore sua saúde financeira, lucros e comissões da equipe."
                 actions={
                     <div className="flex items-center gap-4">
-                        <Button variant="outline" className="gap-2">
-                            <Download className="w-4 h-4" />
+                        <Button
+                            onClick={() => toast.success("Relatórios financeiros em processamento...")}
+                            variant="outline"
+                            className="gap-2 active:scale-95 transition-all"
+                        >
+                            <Download className="w-4 h-4 pointer-events-none" />
                             Relatórios
                         </Button>
-                        <Button className="gap-2 bg-green-600 hover:bg-green-700 shadow-green-100">
-                            <Plus className="w-4 h-4" />
+                        <Button
+                            onClick={() => toast.success("Lançamento de despesa em breve...")}
+                            className="gap-2 bg-green-600 hover:bg-green-700 shadow-green-100 active:scale-95 transition-all"
+                        >
+                            <Plus className="w-4 h-4 pointer-events-none" />
                             Lançar Despesa
                         </Button>
                     </div>
@@ -141,7 +150,14 @@ export default function FinancePage() {
                             <div className="w-2 h-8 bg-zinc-900 rounded-full" />
                             <h2 className="text-xl font-black tracking-tight">Fluxo de Caixa</h2>
                         </div>
-                        <Button variant="ghost" size="sm" className="text-xs font-black uppercase tracking-widest text-indigo-600">Ver Extrato Completo</Button>
+                        <Button
+                            onClick={() => toast.success("Extrato completo disponível em breve...")}
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs font-black uppercase tracking-widest text-indigo-600 active:scale-95 transition-all"
+                        >
+                            Ver Extrato Completo
+                        </Button>
                     </div>
 
                     <div className="flex-1 divide-y divide-zinc-50">
@@ -152,7 +168,7 @@ export default function FinancePage() {
                                         "w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm",
                                         t.type === 'INCOME' ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
                                     )}>
-                                        {t.type === 'INCOME' ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
+                                        {t.type === 'INCOME' ? <ArrowUpRight className="w-6 h-6 pointer-events-none" /> : <ArrowDownRight className="w-6 h-6 pointer-events-none" />}
                                     </div>
                                     <div>
                                         <p className="text-xs font-black text-zinc-900 uppercase tracking-tight mb-1">{t.description}</p>
@@ -204,15 +220,22 @@ export default function FinancePage() {
                                         <p className="text-[9px] font-black uppercase text-zinc-300 tracking-widest mb-1">A Repassar</p>
                                         <p className="text-xl font-black text-zinc-900 tracking-tighter">R$ {comm.commission.toFixed(2)}</p>
                                     </div>
-                                    <button className="p-3 bg-zinc-50 text-zinc-400 rounded-xl hover:bg-indigo-600 hover:text-white transition-all">
-                                        <ArrowRight className="w-5 h-5" />
+                                    <button
+                                        onClick={() => toast.success(`Pagamento de ${comm.name} em processamento...`)}
+                                        className="p-3 bg-zinc-50 text-zinc-400 rounded-xl hover:bg-indigo-600 hover:text-white transition-all active:scale-95"
+                                    >
+                                        <ArrowRight className="w-5 h-5 pointer-events-none" />
                                     </button>
                                 </div>
                             </div>
                         ))}
 
                         <div className="pt-6">
-                            <Button variant="secondary" className="w-full py-4 text-xs font-black uppercase tracking-widest border-2 border-dashed border-zinc-200 bg-transparent hover:bg-zinc-50 hover:border-zinc-300">
+                            <Button
+                                onClick={() => toast.success("Configuração de comissões em breve...")}
+                                variant="secondary"
+                                className="w-full py-4 text-xs font-black uppercase tracking-widest border-2 border-dashed border-zinc-200 bg-transparent hover:bg-zinc-50 hover:border-zinc-300 active:scale-95 transition-all"
+                            >
                                 Configurar Regras de Divisão
                             </Button>
                         </div>

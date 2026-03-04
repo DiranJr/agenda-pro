@@ -8,7 +8,7 @@ const customerSchema = z.object({
     phone: z.string().min(1),
     email: z.string().email().optional().or(z.literal('')),
     noShows: z.number().int().nonnegative().default(0),
-    tags: z.array(z.string()).default([]),
+    tags: z.array(z.string()).or(z.string()).default([]),
 });
 
 export const GET = withTenant(async (request, { db }) => {

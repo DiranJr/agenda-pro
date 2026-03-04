@@ -12,6 +12,7 @@ import {
     MoreVertical,
     Filter,
     ArrowUpDown,
+    CheckCircle2,
     X
 } from "lucide-react";
 import { PageHeader, Input, Badge } from "@/app/components/ui/forms";
@@ -82,10 +83,10 @@ export default function CustomersPage() {
         }
     };
 
-    const filteredCustomers = customers.filter(c =>
-        c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.phone.includes(searchTerm) ||
-        c.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredCustomers = (customers || []).filter(c =>
+        (c.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.phone || "").includes(searchTerm) ||
+        (c.email || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -104,9 +105,9 @@ export default function CustomersPage() {
             {/* Top Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    { label: 'Total de Clientes', value: customers.length, icon: User },
-                    { label: 'Fidelidade Alta', value: customers.filter(c => c.tags.includes('VIP')).length, icon: ArrowUpDown },
-                    { label: 'Risco de Evasão', value: customers.filter(c => c.noShows > 1).length, icon: AlertCircle },
+                    { label: 'Total de Clientes', value: (customers || []).length, icon: User },
+                    { label: 'Fidelidade Alta', value: (customers || []).filter(c => c.tags?.includes('VIP')).length, icon: ArrowUpDown },
+                    { label: 'Risco de Evasão', value: (customers || []).filter(c => c.noShows > 1).length, icon: AlertCircle },
                 ].map((stat, i) => (
                     <Card key={i} padding="p-6" className="flex items-center gap-6">
                         <div className="w-12 h-12 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400">
@@ -123,7 +124,7 @@ export default function CustomersPage() {
             <Card padding="p-0 overflow-hidden">
                 <div className="p-8 border-b border-zinc-50 flex flex-col md:flex-row justify-between items-center gap-6 bg-zinc-50/10">
                     <div className="relative flex-1 w-full">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300 pointer-events-none" />
                         <input
                             type="text"
                             placeholder="Buscar por nome, fone ou e-mail..."

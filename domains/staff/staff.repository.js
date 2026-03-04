@@ -9,7 +9,7 @@ export class StaffRepository {
     async getAll() {
         return prisma.staff.findMany({
             where: { tenantId: this.tenantId },
-            include: { location: true },
+            include: { services: true, location: true },
             orderBy: { name: 'asc' }
         });
     }

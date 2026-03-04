@@ -17,14 +17,17 @@ export async function POST(request) {
             return NextResponse.json({ error: "No file provided" }, { status: 400 });
         }
 
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+        // Garantir que diretório exista
+        const uploadDir = join(process.cwd(), "public/uploads");
+        await mkdir(uploadDir, { recursive: true });
 
         // Nome do arquivo com timestamp para evitar conflitos
         const filename = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-        const path = join(process.cwd(), "public/uploads", filename);
+        const path = join(uploadDir, filename);
 
         // Salvar localmente
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
         await writeFile(path, buffer);
         console.log(`File saved to ${path}`);
 

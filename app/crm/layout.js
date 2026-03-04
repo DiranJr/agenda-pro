@@ -48,13 +48,22 @@ export default function CRMLayout({ children }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const pathname = usePathname();
 
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login';
+        } catch (error) {
+            console.error('Erro ao sair:', error);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#FDFDFF]">
             {/* Mobile Header */}
             <header className="lg:hidden fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-100 h-20 px-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100">
-                        <Calendar className="w-5 h-5" />
+                        <Calendar className="w-5 h-5 pointer-events-none" />
                     </div>
                     <h1 className="text-xl font-black tracking-tight">
                         Agenda <span className="text-indigo-600">Pro</span>
@@ -62,16 +71,16 @@ export default function CRMLayout({ children }) {
                 </div>
                 <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="p-3 bg-zinc-50 rounded-2xl text-zinc-500 border border-zinc-100"
+                    className="p-3 bg-zinc-50 rounded-2xl text-zinc-500 border border-zinc-100 active:scale-95 transition-all"
                 >
-                    {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    {isMenuOpen ? <X className="w-6 h-6 pointer-events-none" /> : <Menu className="w-6 h-6 pointer-events-none" />}
                 </button>
             </header>
 
             {/* Sidebar Overlay */}
             {isMenuOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-zinc-900/20 backdrop-blur-sm lg:hidden transition-all duration-300"
+                    className="fixed inset-0 z-40 bg-zinc-900/40 backdrop-blur-sm lg:hidden transition-all duration-300"
                     onClick={() => setIsMenuOpen(false)}
                 />
             )}
@@ -84,7 +93,7 @@ export default function CRMLayout({ children }) {
                 <div className="p-8 mb-4">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-indigo-600 rounded-[1.25rem] flex items-center justify-center text-white shadow-xl shadow-indigo-100">
-                            <Calendar className="w-6 h-6" />
+                            <Calendar className="w-6 h-6 pointer-events-none" />
                         </div>
                         <div>
                             <h1 className="text-xl font-black tracking-tight leading-none mb-1">
@@ -101,7 +110,9 @@ export default function CRMLayout({ children }) {
                             <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] px-4 mb-6">{section.title}</h3>
                             <ul className="space-y-2">
                                 {section.items.map((item) => {
-                                    const isActive = pathname === item.href;
+                                    const isActive = item.href === '/crm/dashboard'
+                                        ? pathname === item.href
+                                        : pathname.startsWith(item.href);
                                     const Icon = item.icon;
 
                                     return (
@@ -122,7 +133,7 @@ export default function CRMLayout({ children }) {
                                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600 rounded-full" />
                                                 )}
                                                 <Icon className={cn(
-                                                    "w-5 h-5 transition-transform group-hover:scale-110",
+                                                    "w-5 h-5 transition-transform group-hover:scale-110 pointer-events-none",
                                                     isActive ? "text-indigo-600" : "text-zinc-400"
                                                 )} />
                                                 {item.label}
@@ -136,12 +147,16 @@ export default function CRMLayout({ children }) {
                 </nav>
 
                 <div className="p-6 border-t border-zinc-50 bg-zinc-50/30">
-                    <button className="w-full transition-all flex items-center gap-4 px-6 py-4 text-sm font-black text-red-500 hover:bg-red-50 rounded-2xl group">
-                        <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+                    <button
+                        onClick={handleLogout}
+                        className="w-full transition-all flex items-center gap-4 px-6 py-4 text-sm font-black text-red-500 hover:bg-red-50 rounded-2xl group active:scale-95"
+                    >
+                        <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1 pointer-events-none" />
                         Sair do Sistema
                     </button>
                 </div>
             </aside>
+
 
             {/* Desktop Main Header / Topbar */}
             <div className="lg:ml-72 flex flex-col min-h-screen">
@@ -158,8 +173,12 @@ export default function CRMLayout({ children }) {
                     </div>
 
                     <div className="flex items-center gap-6">
-                        <Button size="md" className="gap-2">
-                            <Plus className="w-4 h-4" />
+                        <Button
+                            onClick={() => window.location.href = '/crm/calendar'}
+                            size="md"
+                            className="gap-2 active:scale-95 transition-all"
+                        >
+                            <Plus className="w-4 h-4 pointer-events-none" />
                             Novo Agendamento
                         </Button>
 

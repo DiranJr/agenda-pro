@@ -15,6 +15,7 @@ import {
 import { PageHeader } from "@/app/components/ui/forms";
 import { Button, Card } from "@/app/components/ui/core";
 import { Badge } from "@/app/components/ui/forms";
+import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 8); // 08:00 às 21:00
@@ -61,8 +62,11 @@ export default function CalendarPage() {
                             <button onClick={goToToday} className="px-4 text-xs font-black uppercase tracking-widest text-zinc-900 border-x border-zinc-100 hover:bg-zinc-50 transition-all">Hoje</button>
                             <button onClick={nextWeek} className="p-2 hover:bg-zinc-50 rounded-xl transition-all text-zinc-500"><ChevronRight className="w-5 h-5" /></button>
                         </div>
-                        <Button className="gap-2">
-                            <Plus className="w-4 h-4" />
+                        <Button
+                            onClick={() => toast.success("Abertura de horários em desenvolvimento...")}
+                            className="gap-2 active:scale-95 transition-all"
+                        >
+                            <Plus className="w-4 h-4 pointer-events-none" />
                             Novo Horário
                         </Button>
                     </div>
@@ -106,7 +110,11 @@ export default function CalendarPage() {
                             {weekDays.map(day => (
                                 <div key={day.toISODate()} className="flex-1 relative group">
                                     {HOURS.map(hour => (
-                                        <div key={hour} className="h-32 border-b border-zinc-50 group-hover:bg-zinc-50/20 transition-colors" />
+                                        <div
+                                            key={hour}
+                                            onClick={() => toast.success(`Agendamento rápido para ${day.toFormat('dd/MM')} às ${hour}:00`)}
+                                            className="h-32 border-b border-zinc-50 group-hover:bg-zinc-50/20 transition-colors cursor-crosshair"
+                                        />
                                     ))}
 
                                     {/* Appointments Overlay */}
@@ -124,6 +132,10 @@ export default function CalendarPage() {
                                             <div
                                                 key={app.id}
                                                 style={{ top: `${top}px`, height: `${height}px` }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toast.success(`Detalhes de: ${app.customer.name}`);
+                                                }}
                                                 className="absolute inset-x-1 p-3 bg-white border border-indigo-100 rounded-2xl shadow-xl shadow-indigo-100/20 hover:scale-[1.02] hover:z-10 transition-all cursor-pointer group/item overflow-hidden"
                                             >
                                                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600" />
@@ -131,14 +143,13 @@ export default function CalendarPage() {
                                                     <span className="text-[9px] font-black uppercase text-indigo-600 tracking-widest">{start.toFormat('HH:mm')}</span>
                                                     <Badge variant="indigo" className="px-1.5 py-0 text-[8px]">{app.status}</Badge>
                                                 </div>
-                                                <h4 className="text-xs font-black text-zinc-900 truncate uppercase tracking-tight">{app.customer.name}</h4>
-                                                <p className="text-[9px] font-bold text-zinc-400 truncate mt-1">{app.service.name}</p>
-
+                                                <h4 className="text-xs font-black text-zinc-900 truncate uppercase tracking-tight">{app.customer?.name || "Cliente"}</h4>
+                                                <p className="text-[9px] font-bold text-zinc-400 truncate mt-1">{app.service?.name || "Serviço"}</p>
                                                 <div className="mt-3 flex items-center gap-2 pt-2 border-t border-zinc-50 opacity-0 group-hover/item:opacity-100 transition-opacity">
                                                     <div className="w-5 h-5 bg-zinc-100 rounded-lg flex items-center justify-center text-[8px] font-black text-zinc-400 uppercase">
-                                                        {app.staff.name[0]}
+                                                        {app.staff?.name?.[0] || "?"}
                                                     </div>
-                                                    <span className="text-[9px] font-black text-zinc-400 uppercase">{app.staff.name.split(' ')[0]}</span>
+                                                    <span className="text-[9px] font-black text-zinc-400 uppercase">{app.staff?.name?.split(' ')[0] || "Equipe"}</span>
                                                 </div>
                                             </div>
                                         )
