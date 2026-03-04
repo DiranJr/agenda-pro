@@ -16,11 +16,20 @@ const appointmentSchema = z.object({
 
 export const GET = withTenant(async (request, { db }) => {
     const { searchParams } = new URL(request.url);
-    const date = searchParams.get("date") || DateTime.now().toISODate();
+    const date = searchParams.get("date");
+    const start = searchParams.get("start");
+    const end = searchParams.get("end");
     const staffId = searchParams.get("staffId");
 
     const repo = new AppointmentsRepository(db.tenantId);
-    const appointments = await repo.getByDay(date, staffId);
+    let appointments;
+
+    if (start && end) {
+        appointments = await repo.getByRange(start, end, staffId);
+    } else {
+        const targetDate = date || DateTime.now().toISODate();
+        appointments = await repo.getByDay(targetDate, staffId);
+    }
 
     return apiResponse(appointments);
 });

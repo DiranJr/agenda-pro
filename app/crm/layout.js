@@ -22,16 +22,17 @@ const navSections = [
     {
         title: "Operação",
         items: [
-            { href: "/crm/dashboard", label: "Agenda", icon: Calendar },
+            { href: "/crm/dashboard", label: "Dashboard", icon: BarChart3 },
+            { href: "/crm/calendar", label: "Calendário", icon: Calendar },
             { href: "/crm/customers", label: "Clientes", icon: Users },
             { href: "/crm/services", label: "Serviços", icon: Scissors },
-            { href: "/crm/staff", label: "Equipe", icon: Users }, // Mudado de Profissionais para Equipe
+            { href: "/crm/staff", label: "Equipe", icon: Users },
         ],
     },
     {
         title: "Gestão",
         items: [
-            { href: "/crm/finance", label: "Financeiro", icon: BarChart3, disabled: true },
+            { href: "/crm/finance", label: "Financeiro", icon: BarChart3 },
         ],
     },
     {

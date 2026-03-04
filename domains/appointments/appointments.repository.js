@@ -34,6 +34,30 @@ export class AppointmentsRepository {
         });
     }
 
+    async getByRange(startDate, endDate, staffId = null) {
+        const start = DateTime.fromISO(startDate).startOf('day').toJSDate();
+        const end = DateTime.fromISO(endDate).endOf('day').toJSDate();
+
+        return prisma.appointment.findMany({
+            where: {
+                tenantId: this.tenantId,
+                ...(staffId && { staffId }),
+                startTime: {
+                    gte: start,
+                    lte: end,
+                },
+            },
+            include: {
+                customer: true,
+                service: true,
+                staff: true,
+            },
+            orderBy: {
+                startTime: 'asc',
+            },
+        });
+    }
+
     async getById(id) {
         return prisma.appointment.findFirst({
             where: { id, tenantId: this.tenantId },
