@@ -81,38 +81,6 @@ export default function PublicHomeUI({ tenant, services, staff }) {
                 showPrices={showPrices}
             />
 
-            {/* Success Modal */}
-            <AnimatePresence>
-                {step === 3 && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            className="bg-white rounded-[2.5rem] p-10 max-w-sm w-full text-center shadow-2xl relative overflow-hidden"
-                        >
-                            <div className="absolute top-0 inset-x-0 h-2 bg-green-500" />
-                            <div className="w-20 h-20 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-                                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                            </div>
-                            <h3 className="text-2xl font-black text-zinc-900 tracking-tight">Agendamento Realizado!</h3>
-                            <p className="text-zinc-500 font-medium mt-4">
-                                Sua reserva para <strong>{booking.service?.name}</strong> com <strong>{booking.staff?.name}</strong> foi confirmada.
-                            </p>
-                            <button
-                                onClick={() => { setStep(1); setBookingDone(false); }}
-                                className="w-full mt-10 h-14 bg-zinc-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-black transition-all"
-                            >
-                                Voltar ao Início
-                            </button>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
         </>
     );
 }
