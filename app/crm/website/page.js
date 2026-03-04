@@ -258,8 +258,8 @@ export default function WebsiteSettingsPage() {
                                         <div className="relative h-40 rounded-[2rem] overflow-hidden border border-zinc-100 shadow-inner group">
                                             <Image src={config.customization.heroImageUrl} fill className="object-cover" alt="Banner" unoptimized />
                                             <button
-                                                onClick={() => handleChange('heroImageUrl', '')}
-                                                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all"
+                                                onClick={(e) => { e.stopPropagation(); handleChange('heroImageUrl', ''); }}
+                                                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all cursor-pointer"
                                             >
                                                 <div className="bg-red-500 p-3 rounded-full shadow-lg">
                                                     <Trash2 className="w-5 h-5 text-white" />
@@ -284,8 +284,8 @@ export default function WebsiteSettingsPage() {
                                                 <>
                                                     <Image src={config.customization.logoUrl} fill className="object-cover" alt="Logo" unoptimized />
                                                     <button
-                                                        onClick={() => handleChange('logoUrl', '')}
-                                                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all"
+                                                        onClick={(e) => { e.stopPropagation(); handleChange('logoUrl', ''); }}
+                                                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all cursor-pointer"
                                                     >
                                                         <Trash2 className="w-4 h-4 text-white" />
                                                     </button>
@@ -305,8 +305,8 @@ export default function WebsiteSettingsPage() {
                                         {(config.customization.galleryUrls || []).map((url, i) => (
                                             <div key={i} className="group relative aspect-square rounded-2xl overflow-hidden shadow-sm border border-zinc-100">
                                                 <Image src={url} fill className="object-cover" alt="G" unoptimized />
-                                                <button onClick={() => { const upd = config.customization.galleryUrls.filter((_, idx) => idx !== i); handleChange('galleryUrls', upd); }}
-                                                    className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all"><Trash2 className="w-5 h-5 text-white" /></button>
+                                                <button onClick={(e) => { e.stopPropagation(); const upd = config.customization.galleryUrls.filter((_, idx) => idx !== i); handleChange('galleryUrls', upd); }}
+                                                    className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all cursor-pointer"><Trash2 className="w-5 h-5 text-white" /></button>
                                             </div>
                                         ))}
                                     </div>

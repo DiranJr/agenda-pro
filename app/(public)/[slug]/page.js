@@ -2,6 +2,30 @@ import { getRequestContext } from "@/lib/context";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import PublicHomeUI from "./PublicHomeUI";
+import { SITE_TEMPLATES } from "@/lib/siteTemplates";
+
+export async function generateMetadata({ params }) {
+    const { slug } = await params;
+    const { tenant } = await getRequestContext({ slug });
+
+    if (!tenant) return { title: 'Agenda Pro' };
+
+    const customization = tenant.customization || {};
+    const template = SITE_TEMPLATES[tenant.templateId || 'lash-beauty'] || SITE_TEMPLATES['lash-beauty'];
+    const title = customization.heroTitle || template.defaults.heroTitle;
+    const description = customization.heroSubtitle || template.defaults.heroSubtitle;
+
+    return {
+        title: `${tenant.name} - ${title}`,
+        description: description,
+        openGraph: {
+            title: tenant.name,
+            description: description,
+            images: customization.logoUrl ? [customization.logoUrl] : [],
+        },
+        viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
+    };
+}
 
 export default async function PublicTenantPage({ params }) {
     const { slug } = await params;
@@ -11,7 +35,6 @@ export default async function PublicTenantPage({ params }) {
         return notFound();
     }
 
-    // Buscar serviços e profissionais para exibição imediata
     const services = await prisma.service.findMany({
         where: { tenantId: tenant.id, active: true },
         orderBy: { isFeatured: 'desc' }
@@ -25,24 +48,11 @@ export default async function PublicTenantPage({ params }) {
         }
     });
 
-    // Extrair configuração de tema com fallbacks seguros
-    const theme = tenant.theme || {};
-    const colors = theme.colors || { primary: '#000000', secondary: '#666666' };
-
     return (
-        <main
-            style={{
-                '--primary-color': colors.primary,
-                '--secondary-color': colors.secondary,
-                '--border-radius': theme.borderRadius || '1rem',
-            }}
-            className="min-h-screen bg-white"
-        >
-            <PublicHomeUI
-                tenant={tenant}
-                services={services}
-                staff={staff}
-            />
-        </main>
+        <PublicHomeUI
+            tenant={tenant}
+            services={services}
+            staff={staff}
+        />
     );
 }

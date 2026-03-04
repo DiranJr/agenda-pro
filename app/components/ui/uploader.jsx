@@ -63,7 +63,12 @@ export function ImageUploader({ onUpload, label = "Clique ou arraste para subir 
                 type="file"
                 className="hidden"
                 accept="image/*"
-                onChange={(e) => e.target.files[0] && handleFile(e.target.files[0])}
+                onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) handleFile(file);
+                    e.target.value = null; // Reset so same file can be uploaded again
+                }}
+                onClick={(e) => e.stopPropagation()} // Prevent parent click
             />
 
             <div className={cn(

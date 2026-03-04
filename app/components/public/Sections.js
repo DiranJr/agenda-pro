@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { Calendar, MessageSquare, CheckCircle, Clock, User, Scissors } from "lucide-react";
 
 export function HeroSection({ title, subtitle, logoUrl, radius, tokens }) {
     return (
@@ -127,14 +128,137 @@ export function StaffSection({ staff, booking, onSelect, radius, tokens, primary
     );
 }
 
+export function SlotSection({ slots, loading, onSelect, tokens, radius }) {
+    return (
+        <section className="space-y-6">
+            <h2 className={cn("text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-center", tokens.label)}>Horários Disponíveis</h2>
+
+            {loading ? (
+                <div className="grid grid-cols-3 gap-3">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
+                        <div key={i} className="h-14 bg-zinc-100 animate-pulse rounded-2xl" />
+                    ))}
+                </div>
+            ) : slots && slots.length > 0 ? (
+                <div className="grid grid-cols-3 gap-3">
+                    {slots.map(slot => (
+                        <button
+                            key={slot}
+                            onClick={() => onSelect(slot)}
+                            className={cn("h-14 flex items-center justify-center text-sm font-black transition-all", tokens.slotBtn)}
+                            style={{ borderRadius: radius }}
+                        >
+                            {slot}
+                        </button>
+                    ))}
+                </div>
+            ) : (
+                <div className="p-10 text-center bg-zinc-50 rounded-[2rem] border border-dashed border-zinc-200">
+                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Nenhum horário disponível para este dia.</p>
+                </div>
+            )}
+        </section>
+    );
+}
+
+export function BookingConfirmationModal({ booking, tenant, onDone, tokens, radius }) {
+    const handleGoogleCalendar = () => {
+        const start = `${booking.date.replace(/-/g, '')}T${booking.time.replace(':', '')}00Z`;
+        const end = `${booking.date.replace(/-/g, '')}T${booking.time.replace(':', '')}00Z`; // Simple end time for now
+        const text = encodeURIComponent(`Agendamento: ${booking.service.name} - ${tenant.name}`);
+        const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${start}/${end}&details=Profissional: ${booking.staff.name}`;
+        window.open(url, '_blank');
+    };
+
+    const handleWhatsApp = () => {
+        const message = encodeURIComponent(`Olá! Gostaria de confirmar meu agendamento:\n\n✨ *Serviço:* ${booking.service.name}\n👤 *Profissional:* ${booking.staff.name}\n📅 *Data:* ${booking.date}\n⏰ *Horário:* ${booking.time}\n\nObrigado!`);
+        window.open(`https://wa.me/${tenant.customization?.whatsapp || ''}?text=${message}`, '_blank');
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
+        >
+            <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl relative overflow-hidden text-center"
+            >
+                <div className="absolute top-0 inset-x-0 h-2 bg-green-500" />
+
+                <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner relative">
+                    <CheckCircle className="w-10 h-10" />
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1.5, opacity: 0 }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        className="absolute inset-0 rounded-full border-2 border-green-500"
+                    />
+                </div>
+
+                <h3 className="text-2xl font-black text-zinc-900 tracking-tight uppercase">Tudo Pronto!</h3>
+                <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest mt-2">Seu agendamento foi confirmado</p>
+
+                <div className="mt-8 p-6 bg-zinc-50 rounded-3xl space-y-4 text-left border border-zinc-100">
+                    <div className="flex items-center gap-4">
+                        <Scissors className="w-4 h-4 text-zinc-400" />
+                        <div>
+                            <p className="text-[10px] uppercase font-black text-zinc-300 leading-none">Serviço</p>
+                            <p className="text-sm font-black text-zinc-900 leading-tight">{booking.service?.name}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <User className="w-4 h-4 text-zinc-400" />
+                        <div>
+                            <p className="text-[10px] uppercase font-black text-zinc-300 leading-none">Profissional</p>
+                            <p className="text-sm font-black text-zinc-900 leading-tight">{booking.staff?.name}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <Clock className="w-4 h-4 text-zinc-400" />
+                        <div>
+                            <p className="text-[10px] uppercase font-black text-zinc-300 leading-none">Data e Hora</p>
+                            <p className="text-sm font-black text-zinc-900 leading-tight">{booking.date} às {booking.time}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-8 space-y-3">
+                    <button
+                        onClick={handleGoogleCalendar}
+                        className="w-full h-14 bg-white border-2 border-zinc-100 text-zinc-900 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-zinc-50 transition-all"
+                    >
+                        <Calendar className="w-4 h-4" /> Adicionar ao Google
+                    </button>
+                    <button
+                        onClick={handleWhatsApp}
+                        className="w-full h-14 bg-[#25D366] text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-lg shadow-green-100"
+                    >
+                        <MessageSquare className="w-4 h-4" /> Compartilhar WhatsApp
+                    </button>
+                    <button
+                        onClick={onDone}
+                        className="w-full h-14 bg-zinc-900 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all mt-4"
+                    >
+                        Fechar
+                    </button>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+}
+
 export function FooterSection({ tenantName, tokens }) {
     return (
         <footer className={cn("p-12 text-center space-y-4 border-t border-white/5 bg-black/5", tokens.footer)}>
             <div className="flex flex-col md:flex-row items-center justify-center gap-6">
                 <span className="text-[10px] font-black uppercase tracking-widest opacity-30">© 2026 {tenantName}</span>
                 <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/10" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#FF1B6D] flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#FF1B6D] animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
                     Powered by Agenda Pro
                 </span>
             </div>
