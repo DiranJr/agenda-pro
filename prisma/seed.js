@@ -68,6 +68,15 @@ async function main() {
             phone: '11999999999',
             tenantId: tenant.id,
             locationId: location.id,
+            workSchedule: {
+                mon: { active: true, start: '09:00', end: '18:00', breaks: [{ start: '12:00', end: '13:00' }] },
+                tue: { active: true, start: '09:00', end: '18:00', breaks: [{ start: '12:00', end: '13:00' }] },
+                wed: { active: true, start: '09:00', end: '18:00', breaks: [{ start: '12:00', end: '13:00' }] },
+                thu: { active: true, start: '09:00', end: '18:00', breaks: [{ start: '12:00', end: '13:00' }] },
+                fri: { active: true, start: '09:00', end: '18:00', breaks: [{ start: '12:00', end: '13:00' }] },
+                sat: { active: false, start: '09:00', end: '14:00', breaks: [] },
+                sun: { active: false, start: '09:00', end: '12:00', breaks: [] },
+            }
         },
     });
 

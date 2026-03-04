@@ -24,7 +24,7 @@ const THEMES = {
         label: 'text-zinc-400',
     },
     glass: {
-        page: 'min-h-screen text-zinc-900',
+        page: 'min-h-screen text-zinc-900 bg-gradient-to-br from-indigo-200 via-purple-100 to-pink-100',
         pageBg: 'fixed inset-0 z-[-1] bg-gradient-to-br from-indigo-200 via-purple-100 to-pink-100',
         header: 'bg-white/30 backdrop-blur-xl border-b border-white/40 pt-20 pb-16 px-6 text-center relative',
         logoBox: 'bg-white/60 backdrop-blur-md border border-white/80 text-indigo-700 shadow-xl',
@@ -63,7 +63,7 @@ const THEMES = {
         label: 'text-zinc-500',
     },
     elegant: {
-        page: 'min-h-screen text-stone-900',
+        page: 'min-h-screen text-stone-900 bg-[#F8F4EF]',
         pageBg: 'fixed inset-0 z-[-1] bg-[#F8F4EF]',
         header: 'bg-[#F8F4EF] pt-20 pb-16 px-6 text-center',
         logoBox: 'bg-stone-800 text-amber-100 border-stone-800',
@@ -83,7 +83,7 @@ const THEMES = {
         label: 'text-stone-500',
     },
     dark: {
-        page: 'min-h-screen text-white',
+        page: 'min-h-screen text-white bg-black',
         pageBg: 'fixed inset-0 z-[-1] bg-black',
         header: 'bg-black pt-20 pb-16 px-6 text-center relative overflow-hidden',
         headerGlow: true,

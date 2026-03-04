@@ -4,6 +4,17 @@ import { DateTime } from 'luxon';
 // Maps luxon weekday number to our schedule key
 const WEEKDAY_MAP = { 7: 'sun', 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat' };
 
+// Fallback schedule if none is defined
+const DEFAULT_SCHEDULE = {
+    mon: { active: true, start: '09:00', end: '18:00', breaks: [{ start: '12:00', end: '13:00' }] },
+    tue: { active: true, start: '09:00', end: '18:00', breaks: [{ start: '12:00', end: '13:00' }] },
+    wed: { active: true, start: '09:00', end: '18:00', breaks: [{ start: '12:00', end: '13:00' }] },
+    thu: { active: true, start: '09:00', end: '18:00', breaks: [{ start: '12:00', end: '13:00' }] },
+    fri: { active: true, start: '09:00', end: '18:00', breaks: [{ start: '12:00', end: '13:00' }] },
+    sat: { active: false, start: '09:00', end: '14:00', breaks: [] },
+    sun: { active: false, start: '09:00', end: '12:00', breaks: [] },
+};
+
 export class AvailabilityRepository {
     constructor(tenantId) {
         if (!tenantId) throw new Error('Tenant ID is mandatory for AvailabilityRepository');
@@ -28,8 +39,8 @@ export class AvailabilityRepository {
 
         const dt = DateTime.fromISO(date, { zone: timezone });
         const weekdayKey = WEEKDAY_MAP[dt.weekday];
-        const schedule = staff?.workSchedule;
-        const daySchedule = schedule?.[weekdayKey];
+        const schedule = staff?.workSchedule || DEFAULT_SCHEDULE;
+        const daySchedule = schedule[weekdayKey];
 
         // Se o profissional não trabalha neste dia, retorna vazio
         if (!daySchedule || !daySchedule.active) return [];
@@ -100,7 +111,7 @@ export class AvailabilityRepository {
             });
 
             if (!hasConflict && !overlapBreak) {
-                slots.push(slotStart.toISOTime({ suppressSeconds: true }));
+                slots.push(slotStart.toFormat('HH:mm'));
             }
 
             current = current.plus({ minutes: 30 });
