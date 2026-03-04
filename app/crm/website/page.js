@@ -255,8 +255,16 @@ export default function WebsiteSettingsPage() {
                                     <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest flex items-center gap-2"><Layout className="w-3 h-3" /> Imagem de Capa (Opcional)</label>
                                     <ImageUploader onUpload={(url) => handleChange('heroImageUrl', url)} label="Subir Banner Principal" />
                                     {config.customization.heroImageUrl && (
-                                        <div className="relative h-40 rounded-[2rem] overflow-hidden border border-zinc-100 shadow-inner">
+                                        <div className="relative h-40 rounded-[2rem] overflow-hidden border border-zinc-100 shadow-inner group">
                                             <Image src={config.customization.heroImageUrl} fill className="object-cover" alt="Banner" unoptimized />
+                                            <button
+                                                onClick={() => handleChange('heroImageUrl', '')}
+                                                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all"
+                                            >
+                                                <div className="bg-red-500 p-3 rounded-full shadow-lg">
+                                                    <Trash2 className="w-5 h-5 text-white" />
+                                                </div>
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -271,8 +279,20 @@ export default function WebsiteSettingsPage() {
                                 <div className="space-y-4">
                                     <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest flex items-center gap-2"><Settings className="w-3 h-3" /> Sua Identidade (Logo)</label>
                                     <div className="flex items-center gap-6 p-6 bg-zinc-50 rounded-[2rem] border border-zinc-100">
-                                        <div className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-zinc-100 flex items-center justify-center overflow-hidden relative">
-                                            {config.customization.logoUrl ? <Image src={config.customization.logoUrl} fill className="object-cover" alt="Logo" unoptimized /> : <ImageIcon className="w-8 h-8 text-zinc-100" />}
+                                        <div className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-zinc-100 flex items-center justify-center overflow-hidden relative group">
+                                            {config.customization.logoUrl ? (
+                                                <>
+                                                    <Image src={config.customization.logoUrl} fill className="object-cover" alt="Logo" unoptimized />
+                                                    <button
+                                                        onClick={() => handleChange('logoUrl', '')}
+                                                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all"
+                                                    >
+                                                        <Trash2 className="w-4 h-4 text-white" />
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <ImageIcon className="w-8 h-8 text-zinc-100" />
+                                            )}
                                         </div>
                                         <div className="flex-1"><ImageUploader onUpload={(url) => handleChange('logoUrl', url)} label="Subir Logo" /></div>
                                     </div>
@@ -338,7 +358,7 @@ export default function WebsiteSettingsPage() {
                     <div className={cn("bg-[#0F172A] rounded-[3rem] shadow-2xl transition-all duration-700 overflow-hidden border-[10px] border-[#1E293B] relative",
                         previewMode === 'mobile' ? "w-[300px] h-[600px]" : "w-full h-full max-h-[550px]")}>
                         {previewMode === 'mobile' && <div className="absolute top-0 inset-x-0 h-6 z-50 flex items-center justify-center"><div className="w-20 h-4 bg-[#1E293B] rounded-full" /></div>}
-                        <iframe src={`/${config.slug}?preview=true&template=${config.templateId}&title=${encodeURIComponent(config.customization.heroTitle)}&sub=${encodeURIComponent(config.customization.heroSubtitle)}&logo=${encodeURIComponent(config.customization.logoUrl)}&showPrices=${config.customization.showPrices}`}
+                        <iframe src={`/${config.slug}?preview=true&template=${config.templateId}&title=${encodeURIComponent(config.customization.heroTitle)}&sub=${encodeURIComponent(config.customization.heroSubtitle)}&logo=${encodeURIComponent(config.customization.logoUrl)}&banner=${encodeURIComponent(config.customization.heroImageUrl)}&showPrices=${config.customization.showPrices}`}
                             className="w-full h-full border-none pt-4 bg-white" key={JSON.stringify(config)} />
                     </div>
                 </div>

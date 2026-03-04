@@ -17,6 +17,7 @@ export default function PublicHomeUI({ tenant, services, staff }) {
     const previewTitle = searchParams.get('title');
     const previewSub = searchParams.get('sub');
     const previewLogo = searchParams.get('logo');
+    const previewBanner = searchParams.get('banner');
     const previewShowPrices = searchParams.get('showPrices');
 
     const [step, setStep] = useState(1);
@@ -53,6 +54,7 @@ export default function PublicHomeUI({ tenant, services, staff }) {
         heroTitle: displayTitle,
         heroSubtitle: displaySub,
         logoUrl: displayLogo,
+        heroImageUrl: (isPreview && previewBanner) ? previewBanner : customization.heroImageUrl,
         showPrices: showPrices
     };
 
