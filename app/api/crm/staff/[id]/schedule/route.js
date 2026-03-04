@@ -26,8 +26,9 @@ const scheduleSchema = z.object({
 });
 
 export const GET = withTenant(async (request, { db, params }) => {
+    const { id } = await params;
     const staff = await prisma.staff.findFirst({
-        where: { id: params.id, tenantId: db.tenantId },
+        where: { id, tenantId: db.tenantId },
         select: { id: true, name: true, workSchedule: true }
     });
 
@@ -37,6 +38,7 @@ export const GET = withTenant(async (request, { db, params }) => {
 
 export const PATCH = withTenant(async (request, { db, params }) => {
     try {
+        const { id } = await params;
         const body = await request.json();
         const result = scheduleSchema.safeParse(body);
 
@@ -45,7 +47,7 @@ export const PATCH = withTenant(async (request, { db, params }) => {
         }
 
         const updated = await prisma.staff.updateMany({
-            where: { id: params.id, tenantId: db.tenantId },
+            where: { id, tenantId: db.tenantId },
             data: { workSchedule: result.data }
         });
 
