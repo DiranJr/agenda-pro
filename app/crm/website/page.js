@@ -1,28 +1,54 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
+import {
+    Globe,
+    Palette,
+    Layout,
+    Image as ImageIcon,
+    Type,
+    Eye,
+    Save,
+    RotateCcr,
+    Check,
+    Laptop,
+    Smartphone,
+    ExternalLink,
+    ChevronRight,
+    Sparkles,
+    Search,
+    ShieldCheck
+} from "lucide-react";
+import { PageHeader, Input } from "@/app/components/ui/forms";
+import { Button, Card } from "@/app/components/ui/core";
+import { toast } from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
-const templates = [
-    { id: 'modern', name: 'Moderno', preview: 'bg-white', description: 'Limpo e focado em tipografia.' },
-    { id: 'glass', name: 'Glassmorphism', preview: 'bg-indigo-50', description: 'Efeitos de vidro e transparência.' },
-    { id: 'minimal', name: 'Minimalista', preview: 'bg-zinc-50', description: 'Extrema simplicidade e foco.' },
-    { id: 'elegant', name: 'Elegante', preview: 'bg-stone-50', description: 'Sofisticado com alto contraste.' },
-    { id: 'dark', name: 'Dark Mode', preview: 'bg-zinc-900', description: 'Visual noturno e futurista.' },
+const TEMPLATES = [
+    { id: 'modern', name: 'Moderno', desc: 'Minimalista e focado em alta resolução.', color: 'bg-zinc-900' },
+    { id: 'glass', name: 'Glassmorphism', desc: 'Efeito de vidro e cores suaves.', color: 'bg-indigo-500' },
+    { id: 'minimal', name: 'Minimal', desc: 'Foco total no conteúdo e agendamento.', color: 'bg-white border border-zinc-200' },
+    { id: 'elegant', name: 'Elegante', desc: 'Tipografia serifada e tons terrosos.', color: 'bg-stone-800' },
+    { id: 'dark', name: 'Dark Mode', desc: 'Visual escuro com contrastes vibrantes.', color: 'bg-black' },
 ];
 
 export default function WebsiteSettingsPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [activeTab, setActiveTab] = useState('branding');
+    const [previewMode, setPreviewMode] = useState('mobile');
+    const [hasChanges, setHasChanges] = useState(false);
     const [config, setConfig] = useState({
         theme: {
-            colors: { primary: '#6366f1', secondary: '#a855f7' },
-            borderRadius: '1rem',
-            layoutVariant: 'modern'
+            colors: { primary: '#4f46e5', secondary: '#18181b' },
+            borderRadius: '1.5rem',
+            layoutVariant: 'modern',
         },
         websiteConfig: {
             heroTitle: '',
             heroSubtitle: '',
+            logoUrl: '',
             heroImageUrl: '',
-            showPrices: true
+            showPrices: true,
         },
         slug: ''
     });
@@ -32,16 +58,40 @@ export default function WebsiteSettingsPage() {
             .then(res => res.json())
             .then(data => {
                 if (data.tenant) {
+                    const tenant = data.tenant;
                     setConfig({
-                        theme: data.tenant.theme || config.theme,
-                        websiteConfig: data.tenant.websiteConfig || config.websiteConfig,
-                        slug: data.tenant.slug
+                        theme: tenant.theme || config.theme,
+                        websiteConfig: tenant.websiteConfig || config.websiteConfig,
+                        slug: tenant.slug
                     });
                 }
                 setLoading(false);
             })
             .catch(() => setLoading(false));
     }, []);
+
+    const handleChange = (section, key, value) => {
+        setHasChanges(true);
+        if (section === 'root') {
+            setConfig(prev => ({ ...prev, [key]: value }));
+        } else {
+            setConfig(prev => ({
+                ...prev,
+                [section]: { ...prev[section], [key]: value }
+            }));
+        }
+    };
+
+    const handleThemeColorChange = (key, value) => {
+        setHasChanges(true);
+        setConfig(prev => ({
+            ...prev,
+            theme: {
+                ...prev.theme,
+                colors: { ...prev.theme.colors, [key]: value }
+            }
+        }));
+    };
 
     const handleSave = async () => {
         setSaving(true);
@@ -55,258 +105,259 @@ export default function WebsiteSettingsPage() {
         });
 
         if (res.ok) {
-            alert("Configurações publicadas com sucesso!");
+            toast.success("Alterações publicadas com sucesso!");
+            setHasChanges(false);
         } else {
-            alert("Erro ao salvar.");
+            toast.error("Ocorreu um erro ao publicar seu site.");
         }
         setSaving(false);
     };
 
-    if (loading) return <div className="p-10 text-zinc-400 font-bold">Iniciando motor visual...</div>;
+    if (loading) return (
+        <div className="flex flex-col items-center justify-center h-screen bg-zinc-50 space-y-4">
+            <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-zinc-400 font-black uppercase tracking-widest text-xs animate-pulse">Abrindo Estúdio Visual...</p>
+        </div>
+    );
+
+    const tabs = [
+        { id: 'branding', label: 'Identidade', icon: Palette },
+        { id: 'hero', label: 'Capa / Hero', icon: ImageIcon },
+        { id: 'content', label: 'Conteúdo', icon: Layout },
+        { id: 'seo', label: 'SEO / Google', icon: Search },
+    ];
 
     return (
-        <div className="flex flex-col h-full max-w-7xl mx-auto">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
-                <div>
-                    <h1 className="text-4xl font-black mb-2 tracking-tight">Design & Identidade</h1>
-                    <p className="text-zinc-500 font-medium">Configure como o mundo vê o seu salão.</p>
-                </div>
-                <div className="flex gap-4">
-                    <a
-                        href={`/${config.slug}`}
-                        target="_blank"
-                        className="px-6 py-3 border border-zinc-200 rounded-xl font-bold text-sm hover:bg-zinc-50 transition-all flex items-center gap-2"
-                    >
-                        <span>Ver Site</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                        </svg>
-                    </a>
-                    <button
-                        onClick={handleSave}
-                        disabled={saving}
-                        className="bg-indigo-600 text-white px-10 py-3 rounded-xl font-black text-sm hover:bg-indigo-700 disabled:opacity-50 transition-all shadow-lg shadow-indigo-200"
-                    >
-                        {saving ? 'Publicando...' : 'Salvar Alterações'}
-                    </button>
-                </div>
-            </div>
+        <div className="flex h-[calc(100vh-6rem)] -m-6 lg:-m-12 overflow-hidden bg-zinc-50">
+            {/* Editor Panel */}
+            <div className="flex-1 flex flex-col min-w-[400px] border-r border-zinc-200 bg-white">
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="p-10 space-y-10">
+                        <div>
+                            <div className="flex items-center gap-3 text-indigo-600 font-black text-xs uppercase tracking-widest mb-3">
+                                <Sparkles className="w-4 h-4" />
+                                Editor Visual
+                            </div>
+                            <h2 className="text-3xl font-black tracking-tight text-zinc-900">Personalize seu Site</h2>
+                            <p className="text-zinc-500 font-medium mt-2">Construa uma experiência única para seus clientes.</p>
+                        </div>
 
-            <div className="flex-1 grid grid-cols-1 xl:grid-cols-5 gap-10 min-h-0">
-                {/* Editor Area */}
-                <div className="xl:col-span-3 space-y-8 overflow-y-auto pr-2">
-
-                    {/* Templates Selector */}
-                    <section className="bg-white border border-zinc-200 rounded-[2.5rem] p-8 shadow-sm">
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
-                            <span className="w-4 h-[2px] bg-indigo-600"></span>
-                            Templates Disponíveis
-                        </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {templates.map((tpl) => (
+                        {/* Tabs Navigation */}
+                        <div className="flex p-1.5 bg-zinc-100 rounded-2xl gap-1 overflow-x-auto no-scrollbar">
+                            {tabs.map(tab => (
                                 <button
-                                    key={tpl.id}
-                                    onClick={() => setConfig({ ...config, theme: { ...config.theme, layoutVariant: tpl.id } })}
-                                    className={`relative p-4 rounded-2xl border-2 transition-all text-left ${config.theme.layoutVariant === tpl.id
-                                            ? 'border-indigo-600 bg-indigo-50/50'
-                                            : 'border-zinc-100 hover:border-zinc-200'
-                                        }`}
-                                >
-                                    <div className={`w-full h-20 rounded-lg mb-3 shadow-inner ${tpl.preview}`}></div>
-                                    <div className="font-bold text-sm">{tpl.name}</div>
-                                    <p className="text-[10px] text-zinc-500 mt-1">{tpl.description}</p>
-                                    {config.theme.layoutVariant === tpl.id && (
-                                        <div className="absolute top-3 right-3 w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center text-white">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-                                                <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 0 1 1.04-.208Z" clipRule="evenodd" />
-                                            </svg>
-                                        </div>
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={cn(
+                                        "flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-black transition-all whitespace-nowrap",
+                                        activeTab === tab.id
+                                            ? "bg-white text-zinc-900 shadow-sm"
+                                            : "text-zinc-400 hover:text-zinc-600"
                                     )}
+                                >
+                                    <tab.icon className="w-4 h-4" />
+                                    {tab.label}
                                 </button>
                             ))}
                         </div>
-                    </section>
 
-                    {/* Hero Section */}
-                    <section className="bg-white border border-zinc-200 rounded-[2.5rem] p-8 shadow-sm">
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
-                            <span className="w-4 h-[2px] bg-indigo-600"></span>
-                            Conteúdo Hero
-                        </h3>
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="text-xs font-bold text-zinc-500 mb-2 block uppercase">Título Principal</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Ex: Seu Salão"
+                        {/* Tab Content */}
+                        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                            {activeTab === 'branding' && (
+                                <div className="space-y-10">
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest block ml-1">Cor Primária</label>
+                                            <div className="flex items-center gap-4">
+                                                <input
+                                                    type="color"
+                                                    value={config.theme.colors.primary}
+                                                    onChange={e => handleThemeColorChange('primary', e.target.value)}
+                                                    className="w-14 h-14 rounded-2xl border-4 border-white shadow-lg cursor-pointer overflow-hidden p-0"
+                                                />
+                                                <div className="flex-1">
+                                                    <p className="text-xs font-bold text-zinc-900">{config.theme.colors.primary}</p>
+                                                    <p className="text-[10px] text-zinc-400 uppercase font-black">Hex Code</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest block ml-1">Arredondamento</label>
+                                            <select
+                                                value={config.theme.borderRadius}
+                                                onChange={e => handleChange('theme', 'borderRadius', e.target.value)}
+                                                className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl font-bold focus:ring-4 focus:ring-indigo-600/5 transition-all text-sm"
+                                            >
+                                                <option value="0rem">Quadrado (0px)</option>
+                                                <option value="0.75rem">Suave (12px)</option>
+                                                <option value="1.5rem">Arredondado (24px)</option>
+                                                <option value="3rem">Full (48px)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest block ml-1">Templates de Design</label>
+                                        <div className="grid grid-cols-1 gap-4">
+                                            {TEMPLATES.map(tmp => (
+                                                <button
+                                                    key={tmp.id}
+                                                    onClick={() => handleChange('theme', 'layoutVariant', tmp.id)}
+                                                    className={cn(
+                                                        "p-5 rounded-[1.75rem] border-2 text-left flex items-center gap-6 transition-all group",
+                                                        config.theme.layoutVariant === tmp.id
+                                                            ? "bg-indigo-50 border-indigo-600 shadow-lg shadow-indigo-100"
+                                                            : "bg-white border-zinc-100 hover:border-zinc-200"
+                                                    )}
+                                                >
+                                                    <div className={cn("w-20 h-28 rounded-xl shadow-inner flex items-center justify-center shrink-0", tmp.color)}>
+                                                        <Check className={cn("w-8 h-8", tmp.id === 'minimal' ? 'text-zinc-200' : 'text-white/20')} />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h4 className="font-black text-zinc-900 mb-1 flex items-center gap-2">
+                                                            {tmp.name}
+                                                            {config.theme.layoutVariant === tmp.id && <Badge variant="indigo" className="py-0">Ativo</Badge>}
+                                                        </h4>
+                                                        <p className="text-xs font-medium text-zinc-400 group-hover:text-zinc-500 transition-colors">{tmp.desc}</p>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'hero' && (
+                                <div className="space-y-8">
+                                    <Input
+                                        label="Título Principal (Hero)"
                                         value={config.websiteConfig.heroTitle}
-                                        onChange={e => setConfig({ ...config, websiteConfig: { ...config.websiteConfig, heroTitle: e.target.value } })}
-                                        className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl text-sm font-medium focus:bg-white focus:border-indigo-600 outline-none transition-all"
+                                        onChange={e => handleChange('websiteConfig', 'heroTitle', e.target.value)}
+                                        placeholder="Ex: Seu Olhar no Próximo Nível"
                                     />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-zinc-500 mb-2 block uppercase">Subtítulo</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Ex: O melhor cuidado"
+                                    <Input
+                                        label="Subtítulo Descritivo"
                                         value={config.websiteConfig.heroSubtitle}
-                                        onChange={e => setConfig({ ...config, websiteConfig: { ...config.websiteConfig, heroSubtitle: e.target.value } })}
-                                        className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl text-sm font-medium focus:bg-white focus:border-indigo-600 outline-none transition-all"
+                                        onChange={e => handleChange('websiteConfig', 'heroSubtitle', e.target.value)}
+                                        placeholder="Ex: Agende seu procedimento com os melhores profissionais."
                                     />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold text-zinc-500 mb-2 block uppercase">URL da Imagem Hero</label>
-                                <div className="flex gap-4">
-                                    <input
-                                        type="text"
-                                        placeholder="https://images.unsplash.com/..."
+                                    <Input
+                                        label="URL da Imagem de Capa"
                                         value={config.websiteConfig.heroImageUrl}
-                                        onChange={e => setConfig({ ...config, websiteConfig: { ...config.websiteConfig, heroImageUrl: e.target.value } })}
-                                        className="flex-1 p-4 bg-zinc-50 border border-zinc-100 rounded-2xl text-sm font-mono focus:bg-white focus:border-indigo-600 outline-none transition-all"
+                                        onChange={e => handleChange('websiteConfig', 'heroImageUrl', e.target.value)}
+                                        placeholder="https://images.unsplash.com/..."
                                     />
-                                    {config.websiteConfig.heroImageUrl && (
-                                        <div className="w-14 h-14 rounded-2xl border-2 border-white shadow-md overflow-hidden bg-zinc-100">
-                                            <img src={config.websiteConfig.heroImageUrl} className="w-full h-full object-cover" alt="Preview" />
-                                        </div>
-                                    )}
+                                    <div className="p-6 bg-zinc-50 rounded-2xl border border-dashed border-zinc-200 text-center">
+                                        {config.websiteConfig.heroImageUrl ? (
+                                            <img src={config.websiteConfig.heroImageUrl} className="h-32 w-full object-cover rounded-xl shadow-sm" />
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-2 py-4">
+                                                <ImageIcon className="w-8 h-8 text-zinc-300" />
+                                                <p className="text-[10px] font-black uppercase text-zinc-400">Sem imagem de capa</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <p className="text-[10px] text-zinc-400 mt-2 font-medium">Recomendado: 1200x800px. Você pode usar links do Unsplash.</p>
-                            </div>
-                        </div>
-                    </section>
+                            )}
 
-                    {/* Estilo e Cores */}
-                    <section className="bg-white border border-zinc-200 rounded-[2.5rem] p-8 shadow-sm">
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
-                            <span className="w-4 h-[2px] bg-indigo-600"></span>
-                            Estilo & Cores
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <label className="text-xs font-bold text-zinc-500 mb-4 block uppercase">Paleta de Cores</label>
-                                <div className="flex gap-4">
-                                    <div className="flex-1 p-4 border border-zinc-100 rounded-2xl flex items-center gap-3">
-                                        <input
-                                            type="color"
-                                            value={config.theme.colors.primary}
-                                            onChange={e => setConfig({ ...config, theme: { ...config.theme, colors: { ...config.theme.colors, primary: e.target.value } } })}
-                                            className="w-12 h-12 rounded-xl cursor-pointer border-4 border-white shadow-sm ring-1 ring-zinc-200 overflow-hidden"
-                                        />
+                            {activeTab === 'seo' && (
+                                <div className="space-y-8">
+                                    <div className="p-8 bg-zinc-900 text-white rounded-[2rem] space-y-4">
+                                        <div className="flex items-center gap-2 text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                                            <ShieldCheck className="w-4 h-4" />
+                                            Google Preview
+                                        </div>
                                         <div>
-                                            <div className="text-[10px] font-black uppercase text-zinc-400">Primária</div>
-                                            <div className="text-xs font-mono font-bold uppercase">{config.theme.colors.primary}</div>
+                                            <p className="text-blue-400 text-lg font-medium">{config.websiteConfig.heroTitle || config.slug} | Agenda Pro</p>
+                                            <p className="text-green-500 text-xs">agendapro.com/{config.slug}</p>
+                                            <p className="text-zinc-400 text-xs mt-1 line-clamp-2">{config.websiteConfig.heroSubtitle || "Agende seus serviços de beleza online."}</p>
                                         </div>
                                     </div>
-                                    <div className="flex-1 p-4 border border-zinc-100 rounded-2xl flex items-center gap-3">
-                                        <input
-                                            type="color"
-                                            value={config.theme.colors.secondary}
-                                            onChange={e => setConfig({ ...config, theme: { ...config.theme, colors: { ...config.theme.colors, secondary: e.target.value } } })}
-                                            className="w-12 h-12 rounded-xl cursor-pointer border-4 border-white shadow-sm ring-1 ring-zinc-200 overflow-hidden"
-                                        />
-                                        <div>
-                                            <div className="text-[10px] font-black uppercase text-zinc-400">Secundária</div>
-                                            <div className="text-xs font-mono font-bold uppercase">{config.theme.colors.secondary}</div>
-                                        </div>
-                                    </div>
+                                    <Input label="Site Slug" value={config.slug} disabled className="opacity-50" />
+                                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest leading-relaxed">O slug é o seu endereço web fixo. Se precisar mudar, entre em contato com o suporte para garantir que seus links não parem de funcionar.</p>
                                 </div>
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold text-zinc-500 mb-4 block uppercase">Bordas das Imagens</label>
-                                <div className="grid grid-cols-4 gap-2">
-                                    {['0px', '8px', '24px', '100px'].map(val => (
-                                        <button
-                                            key={val}
-                                            onClick={() => setConfig({ ...config, theme: { ...config.theme, borderRadius: val } })}
-                                            className={`p-3 border-2 rounded-xl transition-all ${config.theme.borderRadius === val ? 'border-indigo-600 bg-indigo-50' : 'border-zinc-100 hover:border-zinc-200'}`}
-                                        >
-                                            <div className="w-full aspect-square bg-zinc-200 mx-auto mb-2" style={{ borderRadius: val }}></div>
-                                            <div className="text-[10px] font-bold text-center">{val === '100px' ? 'Round' : val}</div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
+                            )}
                         </div>
-                    </section>
+                    </div>
                 </div>
 
-                {/* Preview Area (Always Visible on Large Screens) */}
-                <div className="xl:col-span-2 relative min-h-[600px]">
-                    <div className="sticky top-6">
-                        <div className="absolute -top-6 left-0 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Visualização Mobile</div>
-                        <div className="w-full aspect-[9/18] max-w-[340px] mx-auto bg-zinc-900 rounded-[3.5rem] border-[14px] border-zinc-900 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] overflow-hidden relative">
-                            {/* Device Hardware Details */}
-                            <div className="absolute top-0 inset-x-0 h-8 flex justify-center items-center gap-2 z-30">
-                                <div className="w-20 h-5 bg-zinc-900 rounded-full flex items-center justify-center">
-                                    <div className="w-1 h-1 bg-zinc-700 rounded-full"></div>
-                                </div>
+                {/* Sticky Footer Actions */}
+                <div className="p-8 border-t border-zinc-100 bg-white shadow-[0_-20px_40px_rgba(0,0,0,0.02)] flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        {hasChanges ? (
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                                <span className="text-xs font-black text-zinc-900 uppercase tracking-widest">Alterações não salvas</span>
                             </div>
-
-                            {/* App Content Preview */}
-                            <div className={`w-full h-full overflow-y-auto ${config.theme.layoutVariant === 'dark' ? 'bg-zinc-900 text-white' : 'bg-white'}`}>
-
-                                {/* Hero Area */}
-                                <div className="relative pt-12 pb-8 px-6 text-center overflow-hidden">
-                                    {config.websiteConfig.heroImageUrl ? (
-                                        <div className="absolute inset-0 z-0">
-                                            <img src={config.websiteConfig.heroImageUrl} className="w-full h-full object-cover opacity-30" alt="Hero" />
-                                            <div className={`absolute inset-0 bg-gradient-to-b ${config.theme.layoutVariant === 'dark' ? 'from-zinc-900/50 to-zinc-900' : 'from-white/50 to-white'}`}></div>
-                                        </div>
-                                    ) : null}
-
-                                    <div className="relative z-10">
-                                        <div
-                                            style={{ backgroundColor: config.theme.colors.primary }}
-                                            className="w-20 h-20 rounded-3xl mx-auto mb-6 shadow-xl flex items-center justify-center text-white text-3xl font-black"
-                                        >
-                                            {config.websiteConfig.heroTitle?.[0] || 'A'}
-                                        </div>
-                                        <h2 className={`text-2xl font-black mb-2 ${config.theme.layoutVariant === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
-                                            {config.websiteConfig.heroTitle || 'Seu Espaço'}
-                                        </h2>
-                                        <p className="text-xs text-zinc-500 leading-relaxed max-w-[200px] mx-auto">
-                                            {config.websiteConfig.heroSubtitle || 'O melhor cuidado para você.'}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Content Body */}
-                                <div className="p-6 space-y-6">
-                                    <div className={`h-[1px] w-full ${config.theme.layoutVariant === 'dark' ? 'bg-zinc-800' : 'bg-zinc-100'}`}></div>
-
-                                    <div className="text-[10px] font-black uppercase text-zinc-400 spacing-widest">Procedimentos</div>
-
-                                    {[1, 2].map(i => (
-                                        <div key={i} className={`p-4 rounded-3xl border transition-all flex gap-4 items-center ${config.theme.layoutVariant === 'glass' ? 'bg-white/10 backdrop-blur-md border-white/20' :
-                                                config.theme.layoutVariant === 'dark' ? 'bg-zinc-800 border-zinc-700' :
-                                                    'bg-white border-zinc-100'
-                                            }`} style={{ borderRadius: config.theme.borderRadius }}>
-                                            <div className="w-14 h-14 bg-zinc-100 rounded-2xl flex-shrink-0 overflow-hidden">
-                                                <div className="w-full h-full bg-zinc-200"></div>
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="font-bold text-xs mb-1">Serviço Exemplo {i}</div>
-                                                <div className="text-[10px] opacity-50">60 min</div>
-                                            </div>
-                                            <div style={{ color: config.theme.colors.primary }} className="font-black text-xs">R$ 150</div>
-                                        </div>
-                                    ))}
-
-                                    <button
-                                        style={{ backgroundColor: config.theme.colors.primary, borderRadius: config.theme.borderRadius }}
-                                        className="w-full py-5 text-white font-black text-xs shadow-xl transition-all active:scale-95"
-                                    >
-                                        VER DISPONIBILIDADE
-                                    </button>
-                                </div>
-
-                                <div className="p-10 text-center text-[10px] text-zinc-400 font-bold uppercase tracking-widest opacity-30">
-                                    Agenda Pro Cloud
-                                </div>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <Check className="w-4 h-4 text-green-500" />
+                                <span className="text-xs font-black text-zinc-400 uppercase tracking-widest">Tudo atualizado</span>
                             </div>
+                        )}
+                    </div>
+                    <div className="flex gap-4">
+                        <Button
+                            variant="primary"
+                            disabled={!hasChanges}
+                            loading={saving}
+                            onClick={handleSave}
+                            className="px-10"
+                        >
+                            <Save className="w-4 h-4 mr-2" />
+                            Publicar Site
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Live Preview Panel */}
+            <div className="w-[600px] h-full hidden xl:flex flex-col p-10 bg-[#F4F4F9]">
+                <div className="mb-8 flex justify-between items-center">
+                    <div className="flex items-center gap-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400">Preview ao Vivo</h3>
+                        <div className="flex bg-white p-1 rounded-xl shadow-sm border border-zinc-100">
+                            {[
+                                { id: 'mobile', icon: Smartphone },
+                                { id: 'desktop', icon: Laptop }
+                            ].map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setPreviewMode(item.id)}
+                                    className={cn(
+                                        "p-2 rounded-lg transition-all",
+                                        previewMode === item.id ? "bg-zinc-100 text-indigo-600 shadow-inner" : "text-zinc-300 hover:text-zinc-600"
+                                    )}
+                                >
+                                    <item.icon className="w-5 h-5" />
+                                </button>
+                            ))}
                         </div>
+                    </div>
+                    <a
+                        href={`/${config.slug}`}
+                        target="_blank"
+                        className="flex items-center gap-2 text-xs font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-widest"
+                    >
+                        Ver Site Real
+                        <ExternalLink className="w-4 h-4" />
+                    </a>
+                </div>
+
+                <div className="flex-1 flex items-center justify-center overflow-hidden">
+                    <div className={cn(
+                        "bg-white rounded-[3rem] shadow-2xl transition-all duration-700 overflow-hidden border-8 border-zinc-900 relative",
+                        previewMode === 'mobile' ? "w-[340px] h-[680px]" : "w-full h-full max-h-[600px]"
+                    )}>
+                        {/* Mock Browser Header */}
+                        <div className="absolute top-0 inset-x-0 h-12 bg-zinc-900 flex items-center justify-center">
+                            <div className="w-20 h-4 bg-zinc-800 rounded-full" />
+                        </div>
+                        <iframe
+                            src={`/${config.slug}?preview=true`}
+                            className="w-full h-full pt-12 border-none"
+                            key={JSON.stringify(config)} // Force reload on changes for real instant sync if possible
+                        />
                     </div>
                 </div>
             </div>

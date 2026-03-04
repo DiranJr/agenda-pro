@@ -1,5 +1,21 @@
 "use client";
 import { useEffect, useState } from 'react';
+import {
+    Plus,
+    Trash2,
+    Edit3,
+    Phone,
+    Star,
+    CheckCircle2,
+    X,
+    User,
+    Settings,
+    Scissors
+} from "lucide-react";
+import { PageHeader, Input, Badge } from "@/app/components/ui/forms";
+import { Button, Card } from "@/app/components/ui/core";
+import { toast } from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
 export default function StaffPage() {
     const [staff, setStaff] = useState([]);
@@ -42,11 +58,12 @@ export default function StaffPage() {
         });
 
         if (res.ok) {
+            toast.success("Especialista atualizado!");
             setEditingMember(null);
             loadStaff();
         } else {
             const err = await res.json();
-            alert("Erro: " + (err.error?.message || "Algo deu errado"));
+            toast.error("Erro: " + (err.error?.message || "Algo deu errado"));
         }
         setSaving(false);
     };
@@ -56,9 +73,10 @@ export default function StaffPage() {
 
         const res = await fetch(`/api/crm/staff/${id}`, { method: 'DELETE' });
         if (res.ok) {
+            toast.success("Membro removido.");
             loadStaff();
         } else {
-            alert("Erro ao excluir.");
+            toast.error("Erro ao excluir.");
         }
     };
 
@@ -72,158 +90,179 @@ export default function StaffPage() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto">
-            <div className="flex justify-between items-center mb-10">
-                <div>
-                    <h1 className="text-4xl font-black mb-2 tracking-tight">Equipe</h1>
-                    <p className="text-zinc-500 font-medium text-lg">Gerencie os especialistas que fazem a mágica acontecer.</p>
-                </div>
-                <button
-                    onClick={() => setEditingMember({ name: '', phone: '', status: 'ACTIVE', serviceIds: [] })}
-                    className="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-black text-sm hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all flex items-center gap-2"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    Novo Especialista
-                </button>
-            </div>
+        <div className="max-w-7xl mx-auto space-y-10">
+            <PageHeader
+                title="Sua Equipe"
+                subtitle="Gerencie os talentos que fazem a mágica acontecer no Studio."
+                actions={
+                    <Button onClick={() => setEditingMember({ name: '', phone: '', status: 'ACTIVE', serviceIds: [] })} className="gap-2">
+                        <Plus className="w-4 h-4" />
+                        Novo Especialista
+                    </Button>
+                }
+            />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {loading ? (
-                    <div className="col-span-full py-20 text-center text-zinc-400 font-bold uppercase tracking-widest animate-pulse">Carregando equipe...</div>
+                    <div className="col-span-full py-32 text-center">
+                        <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                        <p className="text-zinc-400 font-black uppercase tracking-widest text-xs animate-pulse">Sincronizando equipe...</p>
+                    </div>
                 ) : staff.length === 0 ? (
-                    <div className="col-span-full py-20 text-center bg-white border border-dashed border-zinc-200 rounded-[2.5rem] text-zinc-400">
-                        Nenhum profissional cadastrado. Comece agora!
+                    <div className="col-span-full py-32 text-center bg-white border border-dashed border-zinc-200 rounded-[3rem]">
+                        <div className="w-20 h-20 bg-zinc-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-inner">
+                            <User className="w-8 h-8 text-zinc-200" />
+                        </div>
+                        <h3 className="text-xl font-black text-zinc-900 mb-2">Sua equipe está vazia</h3>
+                        <p className="text-zinc-500 font-medium max-w-xs mx-auto">Cadastre os profissionais para que eles possam aparecer no site de agendamento.</p>
                     </div>
                 ) : staff.map(member => (
-                    <div key={member.id} className="group bg-white border border-zinc-200 rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl hover:shadow-indigo-50 transition-all">
-                        <div className="flex items-center gap-6 mb-8">
-                            <div className="w-16 h-16 bg-zinc-50 rounded-full border-2 border-white shadow-md flex items-center justify-center text-2xl font-black text-zinc-300">
+                    <Card key={member.id} className="group hover:border-indigo-200 transition-all flex flex-col pt-10">
+                        <div className="relative mb-8 text-center">
+                            <div className="w-24 h-24 bg-zinc-50 rounded-full border-4 border-white shadow-xl mx-auto flex items-center justify-center text-3xl font-black text-zinc-300 relative group-hover:scale-105 transition-transform">
                                 {member.name[0]}
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="text-xl font-black text-zinc-900 group-hover:text-indigo-600 transition-colors">{member.name}</h3>
-                                <div className={`inline-flex px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border mt-2 ${member.status === 'ACTIVE' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-zinc-50 text-zinc-400 border-zinc-100'}`}>
-                                    {member.status === 'ACTIVE' ? 'Disponível' : 'Indisponível'}
+                                <div className={cn(
+                                    "absolute bottom-0 right-0 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center text-white",
+                                    member.status === 'ACTIVE' ? "bg-green-500" : "bg-zinc-300"
+                                )}>
+                                    {member.status === 'ACTIVE' ? <CheckCircle2 className="w-4 h-4" /> : <X className="w-4 h-4" />}
                                 </div>
                             </div>
                         </div>
 
-                        <div className="space-y-3 mb-8">
-                            <div className="flex items-center gap-3 text-sm font-medium text-zinc-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-30">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-                                </svg>
-                                {member.phone || 'Sem telefone'}
+                        <div className="text-center mb-8 flex-1">
+                            <h3 className="text-xl font-black text-zinc-900 mb-1 group-hover:text-indigo-600 transition-colors">{member.name}</h3>
+                            <div className="flex items-center justify-center gap-2 mb-6">
+                                <Badge variant={member.status === 'ACTIVE' ? "success" : "default"}>
+                                    {member.status === 'ACTIVE' ? 'Disponível' : 'Indisponível'}
+                                </Badge>
+                                <Badge variant="indigo" className="px-2">{member.services?.length || 0} Serviços</Badge>
                             </div>
-                            <div className="text-xs font-bold text-zinc-400 uppercase tracking-widest bg-zinc-50 p-3 rounded-xl border border-zinc-100/50">
-                                {member.services?.length || 0} Serviços Habilitados
+
+                            <div className="flex flex-col items-center gap-2 text-zinc-400 font-bold text-xs uppercase tracking-widest bg-zinc-50/50 p-4 rounded-2xl border border-zinc-100/50">
+                                <div className="flex items-center gap-2">
+                                    <Phone className="w-3 h-3" />
+                                    {member.phone || '--'}
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex gap-2">
-                            <button
+                        <div className="grid grid-cols-2 gap-2 mt-auto">
+                            <Button
+                                variant="secondary"
+                                size="md"
                                 onClick={() => setEditingMember({ ...member, serviceIds: member.services?.map(s => s.serviceId) || [] })}
-                                className="flex-1 py-4 bg-zinc-50 hover:bg-white border border-zinc-100 hover:border-indigo-600 hover:text-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest transition-all"
+                                className="rounded-xl"
                             >
+                                <Edit3 className="w-4 h-4 mr-2" />
                                 Editar
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="md"
                                 onClick={() => handleDelete(member.id)}
-                                className="px-4 bg-white border border-zinc-100 hover:border-red-600 hover:text-red-600 rounded-2xl transition-all"
+                                className="rounded-xl border-red-100 text-red-600 hover:bg-red-50 hover:border-red-200"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                </svg>
-                            </button>
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
                         </div>
-                    </div>
+                    </Card>
                 ))}
             </div>
 
             {/* Modal de Edição Profissional */}
             {editingMember && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm shadow-2xl overflow-y-auto">
-                    <div className="bg-white rounded-[3rem] w-full max-w-2xl my-auto overflow-hidden shadow-2xl animate-in zoom-in duration-300">
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm overflow-y-auto">
+                    <Card padding="p-0" className="w-full max-w-3xl my-auto animate-in zoom-in duration-300 overflow-hidden shadow-2xl">
                         <div className="p-10 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/50">
-                            <div>
-                                <h3 className="text-2xl font-black tracking-tight">{editingMember.id ? 'Editar Especialista' : 'Novo Especialista'}</h3>
-                                <p className="text-sm text-zinc-500 font-medium">Cadastre um novo talento e defina suas habilidades.</p>
+                            <div className="flex items-center gap-6">
+                                <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-zinc-100 flex items-center justify-center text-zinc-300 text-2xl font-black">
+                                    {editingMember.name?.[0] || <User className="w-8 h-8" />}
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-black tracking-tight">{editingMember.id ? 'Perfis de Especialista' : 'Novo Talento'}</h3>
+                                    <p className="text-sm text-zinc-500 font-medium">Defina as competências e contatos do profissional.</p>
+                                </div>
                             </div>
                             <button onClick={() => setEditingMember(null)} className="p-3 bg-white border border-zinc-100 rounded-2xl text-zinc-400 hover:text-black transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                </svg>
+                                <X className="w-6 h-6" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleSave} className="p-10 space-y-8">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-2 block ml-1">Nome Completo</label>
-                                    <input
-                                        required
-                                        value={editingMember.name}
-                                        onChange={e => setEditingMember({ ...editingMember, name: e.target.value })}
-                                        className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl font-bold focus:bg-white focus:border-indigo-600 outline-none transition-all"
-                                        placeholder="Ex: João Silva"
-                                    />
+                        <form onSubmit={handleSave} className="p-10 space-y-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <Input
+                                    label="Nome do Profissional"
+                                    required
+                                    value={editingMember.name}
+                                    onChange={e => setEditingMember({ ...editingMember, name: e.target.value })}
+                                    placeholder="Ex: Amanda Lima"
+                                />
+                                <Input
+                                    label="Fone / WhatsApp"
+                                    required
+                                    value={editingMember.phone}
+                                    onChange={e => setEditingMember({ ...editingMember, phone: e.target.value })}
+                                    placeholder="(00) 00000-0000"
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Especialidades Habilitadas</label>
+                                    <Badge variant="indigo">{editingMember.serviceIds?.length || 0} Selecionados</Badge>
                                 </div>
-                                <div>
-                                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-2 block ml-1">Telefone / WhatsApp</label>
-                                    <input
-                                        required
-                                        value={editingMember.phone}
-                                        onChange={e => setEditingMember({ ...editingMember, phone: e.target.value })}
-                                        className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl font-bold focus:bg-white focus:border-indigo-600 outline-none transition-all"
-                                        placeholder="(00) 00000-0000"
-                                    />
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-56 overflow-y-auto p-4 bg-zinc-50 rounded-[2rem] border border-zinc-100 shadow-inner custom-scrollbar">
+                                    {services.map(service => {
+                                        const isSelected = editingMember.serviceIds?.includes(service.id);
+                                        return (
+                                            <button
+                                                key={service.id}
+                                                type="button"
+                                                onClick={() => toggleService(service.id)}
+                                                className={cn(
+                                                    "p-4 rounded-2xl text-left border transition-all flex flex-col gap-2 group relative overflow-hidden",
+                                                    isSelected
+                                                        ? "bg-white border-indigo-600 text-indigo-700 shadow-md"
+                                                        : "bg-white/50 border-zinc-200 text-zinc-400 hover:border-zinc-300"
+                                                )}
+                                            >
+                                                {isSelected && (
+                                                    <div className="absolute top-0 right-0 p-1.5 bg-indigo-600 text-white rounded-bl-xl shadow-lg">
+                                                        <CheckCircle2 className="w-3 h-3" />
+                                                    </div>
+                                                )}
+                                                <Scissors className={cn("w-4 h-4", isSelected ? "text-indigo-600" : "text-zinc-200")} />
+                                                <span className="text-[11px] font-black uppercase tracking-tight line-clamp-2 leading-none">{service.name}</span>
+                                            </button>
+                                        )
+                                    })}
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-4 block ml-1">Serviços que realiza</label>
-                                <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto p-2">
-                                    {services.map(service => (
-                                        <button
-                                            key={service.id}
-                                            type="button"
-                                            onClick={() => toggleService(service.id)}
-                                            className={`p-4 rounded-2xl text-left border transition-all flex items-center justify-between group ${editingMember.serviceIds?.includes(service.id) ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-zinc-100 text-zinc-500 hover:border-zinc-300'}`}
-                                        >
-                                            <span className="text-sm font-bold">{service.name}</span>
-                                            {editingMember.serviceIds?.includes(service.id) && (
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                                                    <path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4.13-5.69Z" clipRule="evenodd" />
-                                                </svg>
-                                            )}
-                                        </button>
-                                    ))}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+                                <div>
+                                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-2 block ml-1">Disponibilidade</label>
+                                    <select
+                                        value={editingMember.status}
+                                        onChange={e => setEditingMember({ ...editingMember, status: e.target.value })}
+                                        className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl font-bold focus:bg-white focus:border-indigo-600 outline-none transition-all"
+                                    >
+                                        <option value="ACTIVE">Ativo / Agendável</option>
+                                        <option value="INACTIVE">Pausado / Férias</option>
+                                    </select>
                                 </div>
-                            </div>
-
-                            <div className="pb-4">
-                                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-2 block ml-1">Status de Disponibilidade</label>
-                                <select
-                                    value={editingMember.status}
-                                    onChange={e => setEditingMember({ ...editingMember, status: e.target.value })}
-                                    className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl font-bold focus:bg-white focus:border-indigo-600 outline-none transition-all"
+                                <Button
+                                    type="submit"
+                                    className="w-full py-6 rounded-[1.5rem]"
+                                    loading={saving}
                                 >
-                                    <option value="ACTIVE">Ativo / Disponível</option>
-                                    <option value="INACTIVE">Inativo / Pausado</option>
-                                </select>
+                                    <Settings className="w-4 h-4 mr-2" />
+                                    {editingMember.id ? 'Atualizar Perfil' : 'Contratar Especialista'}
+                                </Button>
                             </div>
-
-                            <button
-                                type="submit"
-                                disabled={saving}
-                                className="w-full bg-indigo-600 text-white py-6 rounded-3xl font-black text-sm uppercase tracking-widest hover:bg-indigo-700 shadow-xl shadow-indigo-200 transition-all disabled:opacity-50"
-                            >
-                                {saving ? 'Sincronizando...' : 'Salvar Especialista'}
-                            </button>
                         </form>
-                    </div>
+                    </Card>
                 </div>
             )}
         </div>
