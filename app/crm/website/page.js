@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { PageHeader, Input, Badge } from "@/app/components/ui/forms";
 import { Button, Card } from "@/app/components/ui/core";
+import { ImageUploader } from "@/app/components/ui/uploader";
 import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 
@@ -263,21 +264,16 @@ export default function WebsiteSettingsPage() {
                                 <div className="space-y-8">
                                     <div className="flex items-center justify-between">
                                         <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest block ml-1">Fotos do seu Trabalho</label>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="h-8 py-0 px-3 text-[10px] font-black uppercase tracking-widest gap-2"
-                                            onClick={() => {
-                                                const url = prompt("Cole a URL da imagem:");
-                                                if (url) {
-                                                    handleChange('websiteConfig', 'gallery', [...config.websiteConfig.gallery, url]);
-                                                }
-                                            }}
-                                        >
-                                            <Plus className="w-3 h-3" />
-                                            Adicionar Foto
-                                        </Button>
+                                        <span className="text-[10px] font-black uppercase text-zinc-300 tracking-widest">Até 10 fotos</span>
                                     </div>
+
+                                    <ImageUploader
+                                        onUpload={(url) => {
+                                            const currentGallery = config.websiteConfig.gallery || [];
+                                            handleChange('websiteConfig', 'gallery', [...currentGallery, url]);
+                                        }}
+                                        label="Clique ou arraste para subir fotos da galeria"
+                                    />
 
                                     <div className="grid grid-cols-2 gap-4">
                                         {(config.websiteConfig.gallery || []).map((url, index) => (
@@ -327,11 +323,18 @@ export default function WebsiteSettingsPage() {
                                         placeholder="Ex: Agende seu procedimento com os melhores profissionais."
                                     />
                                     <Input
-                                        label="URL da Imagem de Capa"
+                                        label="URL da Imagem de Capa (Manual)"
                                         value={config.websiteConfig.heroImageUrl}
                                         onChange={e => handleChange('websiteConfig', 'heroImageUrl', e.target.value)}
                                         placeholder="https://images.unsplash.com/..."
                                     />
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest block ml-1">Upload de Capa</label>
+                                        <ImageUploader
+                                            onUpload={(url) => handleChange('websiteConfig', 'heroImageUrl', url)}
+                                            label="Substituir imagem de capa"
+                                        />
+                                    </div>
                                     <div className="p-6 bg-zinc-50 rounded-2xl border border-dashed border-zinc-200 text-center">
                                         {config.websiteConfig.heroImageUrl ? (
                                             <img src={config.websiteConfig.heroImageUrl} className="h-32 w-full object-cover rounded-xl shadow-sm" />
@@ -464,6 +467,6 @@ export default function WebsiteSettingsPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
