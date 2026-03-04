@@ -18,8 +18,11 @@ async function main() {
                 heroTitle: 'Studio Josy Silva',
                 heroSubtitle: 'Especialista em Cílios e Sobrancelhas',
                 aboutText: 'Mais que um salão, um refúgio para sua beleza.',
+                contactWhatsapp: '5511999999999',
+                heroImageUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=1200', // Foto de salão premium
             },
             theme: {
+                layoutVariant: 'elegant', // modern, minimal, glass, elegant, dark
                 colors: {
                     primary: '#6366f1',
                     secondary: '#a855f7',
@@ -55,6 +58,7 @@ async function main() {
             price: 180.00,
             tenantId: tenant.id,
             isFeatured: true,
+            imageUrl: 'https://images.unsplash.com/photo-1620331311520-246422fd82f9?auto=format&fit=crop&q=80&w=600', // Foto de cílios
         },
     });
 
@@ -72,6 +76,16 @@ async function main() {
             staffId: staff.id,
             serviceId: service.id,
         },
+    });
+
+    await prisma.customer.create({
+        data: {
+            name: 'Maria Cliente VIP',
+            phone: '5511888888888',
+            email: 'maria@example.com',
+            tags: 'VIP',
+            tenantId: tenant.id
+        }
     });
 
     console.log('Seed completed successfully!');

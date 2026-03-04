@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 // --- Enum Types ---
@@ -44,6 +44,7 @@ model Tenant {
   customers        Customer[]
   appointments     Appointment[]
   blocks           Block[]
+  users            User[]
 
   @@index([slug])
 }
@@ -83,7 +84,7 @@ model Staff {
   id        String   @id @default(cuid())
   name      String
   phone     String?
-  status    StaffStatus @default(ACTIVE)
+  status    String @default("ACTIVE")
   
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
@@ -107,11 +108,12 @@ model Service {
   name         String
   category     String?  // Ex: "Lash", "Sobrancelha"
   duration     Int      // Minutos
-  price        Decimal  @db.Decimal(10, 2)
+  price        Float
   bufferBefore Int      @default(0)
   bufferAfter  Int      @default(0)
   active       Boolean  @default(true)
   isFeatured   Boolean  @default(false)
+  imageUrl     String?  // Foto do serviço
 
   tenantId     String
   tenant       Tenant   @relation(fields: [tenantId], references: [id])
@@ -130,7 +132,7 @@ model StaffService {
   staffId   String
   serviceId String
   duration  Int?    // Opcional: sobrescreve a duração padrão do serviço para este profissional
-  price     Decimal? @db.Decimal(10, 2) // Opcional: preço específico
+  price     Float? 
 
   staff     Staff    @relation(fields: [staffId], references: [id])
   service   Service  @relation(fields: [serviceId], references: [id])
@@ -144,7 +146,7 @@ model Customer {
   phone     String   // Prioritário conforme requisitos
   email     String?
   noShows   Int      @default(0)
-  tags      String[] // Tags simples (array de strings)
+  tags      String? // Comma separated tags for SQLite
 
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
@@ -162,7 +164,7 @@ model Appointment {
   id          String            @id @default(cuid())
   startTime   DateTime          // UTC conforme requisitos
   endTime     DateTime          // UTC conforme requisitos
-  status      AppointmentStatus @default(SCHEDULED)
+  status      String @default("SCHEDULED")
   notes       String?
 
   tenantId    String
