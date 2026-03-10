@@ -14,6 +14,22 @@ export async function POST(request) {
         const formData = await request.formData();
         const file = formData.get("file");
 
+        if (!file) {
+            return NextResponse.json({ error: "No file provided" }, { status: 400 });
+        }
+
+        // Validação de tipo de arquivo no backend
+        const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+        if (!allowedTypes.includes(file.type)) {
+            return NextResponse.json({ error: "Tipo de arquivo não permitido. Apenas JPG, PNG e WEBP são aceitos." }, { status: 400 });
+        }
+
+        // Limite de tamanho (ex: 5MB)
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            return NextResponse.json({ error: "O arquivo é muito grande. Máximo permitido: 5MB." }, { status: 400 });
+        }
+
         const { url } = await uploadFile({ file });
         console.log(`File uploaded successfully: ${url}`);
 
