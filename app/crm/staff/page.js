@@ -240,9 +240,9 @@ export default function StaffPage() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                                 <div>
-                                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-2 block ml-1">Disponibilidade</label>
+                                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-2 block ml-1">Status Profissional</label>
                                     <select
                                         value={editingMember.status}
                                         onChange={e => setEditingMember({ ...editingMember, status: e.target.value })}
@@ -252,15 +252,50 @@ export default function StaffPage() {
                                         <option value="INACTIVE">Pausado / Férias</option>
                                     </select>
                                 </div>
-                                <Button
-                                    type="submit"
-                                    className="w-full py-6 rounded-[1.5rem]"
-                                    loading={saving}
-                                >
-                                    <Settings className="w-4 h-4 mr-2" />
-                                    {editingMember.id ? 'Atualizar Perfil' : 'Contratar Especialista'}
-                                </Button>
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest block ml-1">Horário Padrão</label>
+                                    <div className="flex gap-4">
+                                        <div className="flex-1">
+                                            <Input
+                                                label="Início"
+                                                type="time"
+                                                value={editingMember.workSchedule?.mon?.start || "09:00"}
+                                                onChange={e => {
+                                                    const sched = editingMember.workSchedule || {};
+                                                    ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(day => {
+                                                        sched[day] = { ...sched[day], start: e.target.value, active: true };
+                                                    });
+                                                    setEditingMember({ ...editingMember, workSchedule: sched });
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="flex-1">
+                                            <Input
+                                                label="Fim"
+                                                type="time"
+                                                value={editingMember.workSchedule?.mon?.end || "18:00"}
+                                                onChange={e => {
+                                                    const sched = editingMember.workSchedule || {};
+                                                    ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(day => {
+                                                        sched[day] = { ...sched[day], end: e.target.value, active: true };
+                                                    });
+                                                    setEditingMember({ ...editingMember, workSchedule: sched });
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <p className="text-[9px] text-zinc-400 italic px-1">Configuração rápida para dias de semana.</p>
+                                </div>
                             </div>
+
+                            <Button
+                                type="submit"
+                                className="w-full py-6 rounded-[1.5rem] mt-6"
+                                loading={saving}
+                            >
+                                <Settings className="w-4 h-4 mr-2" />
+                                {editingMember.id ? 'Atualizar Perfil' : 'Contratar Especialista'}
+                            </Button>
                         </form>
                     </Card>
                 </div>

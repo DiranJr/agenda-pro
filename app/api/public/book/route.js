@@ -35,20 +35,10 @@ export async function POST(request) {
 
         const tenantId = tenant.id;
 
-        const customerRepo = new CustomersRepository(tenantId);
-        let customer = await prisma.customer.findFirst({
-            where: { phone: customerData.phone, tenantId }
+        const service = await prisma.service.findFirst({
+            where: { id: serviceId, tenantId, active: true }
         });
-
-        if (!customer) {
-            customer = await customerRepo.create(customerData);
-        }
-
-        const serviceRepo = new ServicesRepository(tenantId);
-        const service = await serviceRepo.getById(serviceId);
-        if (!service) {
-            return NextResponse.json({ error: "Service not found" }, { status: 404 });
-        }
+        if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });
 
         const start = DateTime.fromISO(`${date}T${time}`, { zone: timezone });
         const end = start.plus({ minutes: service.duration });
@@ -56,29 +46,70 @@ export async function POST(request) {
         const startWithBuffer = start.minus({ minutes: service.bufferBefore });
         const endWithBuffer = end.plus({ minutes: service.bufferAfter });
 
-        const appRepo = new AppointmentsRepository(tenantId);
-        const hasConflict = await appRepo.hasConflict(staffId, startWithBuffer.toJSDate(), endWithBuffer.toJSDate());
+        const appointment = await prisma.$transaction(async (tx) => {
+            // 1. Criar ou Buscar Cliente
+            let customer = await tx.customer.findFirst({
+                where: { phone: customerData.phone, tenantId }
+            });
 
-        if (hasConflict) {
-            return NextResponse.json({ error: "Horario nao mais disponivel." }, { status: 409 });
-        }
+            if (!customer) {
+                customer = await tx.customer.create({
+                    data: {
+                        name: customerData.name,
+                        phone: customerData.phone,
+                        tenantId
+                    }
+                });
+            }
 
-        const location = await prisma.location.findFirst({ where: { tenantId } });
-        if (!location) {
-            return NextResponse.json({ error: "Location not found" }, { status: 404 });
-        }
+            // 2. Verificar Conflito novamente de forma atômica
+            // Nota: SQLite não suporta FOR UPDATE, mas o nível de isolamento serializable ajuda.
+            // Aqui fazemos a busca dentro da transação.
+            const conflicts = await tx.appointment.findMany({
+                where: {
+                    tenantId,
+                    staffId,
+                    status: { not: 'CANCELED' },
+                    startTime: { lt: endWithBuffer.toJSDate() },
+                    endTime: { gt: startWithBuffer.toJSDate() },
+                },
+            });
 
-        const appointment = await appRepo.create({
-            startTime: start.toJSDate(),
-            endTime: end.toJSDate(),
-            staffId,
-            customerId: customer.id,
-            serviceId,
-            locationId: location.id,
+            const blocks = await tx.block.findMany({
+                where: {
+                    tenantId,
+                    staffId,
+                    startTime: { lt: endWithBuffer.toJSDate() },
+                    endTime: { gt: startWithBuffer.toJSDate() },
+                }
+            });
+
+            if (conflicts.length > 0 || blocks.length > 0) {
+                throw new Error("ConcurrencyConflict: Horario nao mais disponivel.");
+            }
+
+            const location = await tx.location.findFirst({ where: { tenantId } });
+            if (!location) throw new Error("Location not found");
+
+            // 3. Criar Agendamento
+            return tx.appointment.create({
+                data: {
+                    startTime: start.toJSDate(),
+                    endTime: end.toJSDate(),
+                    staffId,
+                    customerId: customer.id,
+                    serviceId,
+                    locationId: location.id,
+                    tenantId
+                }
+            });
         });
 
         return NextResponse.json(appointment, { status: 201 });
     } catch (err) {
+        if (err.message.includes("ConcurrencyConflict")) {
+            return NextResponse.json({ error: "Este horário acabou de ser reservado por outra pessoa. Por favor, escolha outro." }, { status: 409 });
+        }
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
 }

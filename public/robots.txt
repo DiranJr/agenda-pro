@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /crm/
+Disallow: /login
+
+Sitemap: https://agendapro.com.br/sitemap.xml

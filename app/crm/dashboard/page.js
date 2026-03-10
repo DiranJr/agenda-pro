@@ -28,8 +28,14 @@ import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
     const [date, setDate] = useState(DateTime.now().toISODate());
+    const [now, setNow] = useState(DateTime.now());
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setInterval(() => setNow(DateTime.now()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     useEffect(() => {
         async function loadAppointments() {
@@ -50,14 +56,14 @@ export default function DashboardPage() {
     const stats = {
         revenue: appointments.reduce((acc, app) => acc + (app.status !== 'CANCELED' ? Number(app.service?.price || 0) : 0), 0),
         count: appointments.length,
-        confirmed: appointments.filter(a => ['CONFIRMED', 'DONE'].includes(a.status)).length,
-        pending: appointments.filter(a => a.status === 'PENDING').length,
+        confirmed: appointments.filter(a => ['CONFIRMED', 'DONE', 'CANCELED', 'NO_SHOW'].includes(a.status)).length, // Contar todos exceto deletados se houver
+        done: appointments.filter(a => a.status === 'DONE').length,
     };
 
-    const confirmationRate = stats.count > 0 ? Math.round((stats.confirmed / stats.count) * 100) : 0;
+    const confirmationRate = stats.count > 0 ? Math.round((stats.done / stats.count) * 100) : 0;
 
     const getTimeGreeting = () => {
-        const hour = DateTime.now().hour;
+        const hour = now.hour;
         if (hour < 12) return "Bom dia";
         if (hour < 18) return "Boa tarde";
         return "Boa noite";
@@ -74,7 +80,11 @@ export default function DashboardPage() {
                     <h1 className="text-4xl font-black text-zinc-900 tracking-tight">
                         {getTimeGreeting()}, <span className="text-indigo-600">Admin</span>
                     </h1>
-                    <p className="text-zinc-400 font-medium mt-2">Veja como está o desempenho do seu negócio hoje.</p>
+                    <div className="flex items-center gap-2 mt-2">
+                        <p className="text-zinc-400 font-medium">{now.setLocale('pt-BR').toFormat("cccc, dd 'de' MMMM")}</p>
+                        <span className="w-1 h-1 rounded-full bg-zinc-300" />
+                        <p className="text-indigo-600 font-bold tabular-nums">{now.toFormat("HH:mm:ss")}</p>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3 bg-white p-2 rounded-[2rem] shadow-sm border border-zinc-100">

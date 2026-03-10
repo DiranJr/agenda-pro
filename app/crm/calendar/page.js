@@ -134,11 +134,35 @@ export default function CalendarPage() {
                                                 style={{ top: `${top}px`, height: `${height}px` }}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    toast.success(`Detalhes de: ${app.customer.name}`);
+                                                    const newStatus = prompt(`Alterar status de ${app.customer.name} para:`, app.status);
+                                                    const validStatus = ['SCHEDULED', 'CONFIRMED', 'DONE', 'CANCELED', 'NO_SHOW'];
+                                                    if (newStatus && validStatus.includes(newStatus.toUpperCase())) {
+                                                        const finalStatus = newStatus.toUpperCase();
+                                                        fetch(`/api/crm/appointments/${app.id}`, {
+                                                            method: 'PATCH',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ status: finalStatus })
+                                                        }).then(res => {
+                                                            if (res.ok) {
+                                                                toast.success("Status atualizado!");
+                                                                loadEvents();
+                                                            }
+                                                        });
+                                                    } else if (newStatus) {
+                                                        toast.error("Status inválido. Use: SCHEDULED, CONFIRMED, DONE, CANCELED ou NO_SHOW");
+                                                    }
                                                 }}
-                                                className="absolute inset-x-1 p-3 bg-white border border-indigo-100 rounded-2xl shadow-xl shadow-indigo-100/20 hover:scale-[1.02] hover:z-10 transition-all cursor-pointer group/item overflow-hidden"
+                                                className={cn(
+                                                    "absolute inset-x-1 p-3 bg-white border rounded-2xl shadow-xl shadow-indigo-100/20 hover:scale-[1.02] hover:z-10 transition-all cursor-pointer group/item overflow-hidden",
+                                                    app.status === 'DONE' ? "border-emerald-200 opacity-60" : "border-indigo-100"
+                                                )}
                                             >
-                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600" />
+                                                <div className={cn(
+                                                    "absolute left-0 top-0 bottom-0 w-1",
+                                                    app.status === 'DONE' ? "bg-emerald-500" :
+                                                        app.status === 'CANCELED' ? "bg-red-500" :
+                                                            app.status === 'NO_SHOW' ? "bg-amber-700" : "bg-indigo-600"
+                                                )} />
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="text-[9px] font-black uppercase text-indigo-600 tracking-widest">{start.toFormat('HH:mm')}</span>
                                                     <Badge variant="indigo" className="px-1.5 py-0 text-[8px]">{app.status}</Badge>
