@@ -31,13 +31,14 @@ Sites de agendamento gerados dinamicamente:
 - **Exemplo Josy Silva:** [http://localhost:3016/studio-josy](http://localhost:3016/studio-josy)
 
 ## 🎨 Galeria de Templates (Layouts)
-O sistema conta agora com 6 layouts técnicos:
-1. **Manicure Pastel (Novo):** Soft, elegante, focado em estética delicada.
-2. **Barber Clean (Novo):** Premium Dark, industrial, vibes vintage.
-3. **Beauty Soft:** Clássico feminino.
-4. **Premium Dark:** Luxo e sofisticação.
-5. **Clean Clinic:** Profissional e direto.
-6. **Modern Studio:** Vibrante e enérgico.
+O sistema conta agora com 7 layouts técnicos exclusivos:
+1. **Elegant Glow (Novo):** A estética definitiva. Glassmorphism, tipografia premium e animações fluidas.
+2. **Manicure Pastel:** Soft, elegante, focado em estética delicada.
+3. **Barber Clean:** Premium Dark, industrial, vibes vintage.
+4. **Beauty Soft:** Clássico feminino.
+5. **Premium Dark:** Luxo e sofisticação.
+6. **Clean Clinic:** Profissional e direto.
+7. **Modern Studio:** Vibrante e enérgico.
 
 ## 👤 Como Cadastrar Novos Clientes (Tenants)
 1. **Criação:** Novos tenants podem ser criados via API ou via script de seed.
