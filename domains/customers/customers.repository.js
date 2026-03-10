@@ -37,6 +37,41 @@ export class CustomersRepository {
         return customers.map(normalizeCustomer);
     }
 
+    async getAllWithStats() {
+        const customers = await prisma.customer.findMany({
+            where: { tenantId: this.tenantId },
+            include: {
+                appointments: {
+                    where: { status: { in: ['CONFIRMED', 'DONE'] } },
+                    orderBy: { startTime: 'desc' },
+                    take: 1
+                }
+            },
+            orderBy: { name: 'asc' }
+        });
+        return customers.map(c => {
+            const normalized = normalizeCustomer(c);
+            normalized.lastVisit = c.appointments?.[0]?.startTime || null;
+            delete normalized.appointments; // Limpa para não inflar o payload
+            return normalized;
+        });
+    }
+
+    async search(query) {
+        const customers = await prisma.customer.findMany({
+            where: {
+                tenantId: this.tenantId,
+                OR: [
+                    { name: { contains: query } },
+                    { phone: { contains: query } }
+                ]
+            },
+            take: 10,
+            orderBy: { name: 'asc' }
+        });
+        return customers.map(normalizeCustomer);
+    }
+
     async getById(id) {
         const customer = await prisma.customer.findFirst({
             where: { id, tenantId: this.tenantId }

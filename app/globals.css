@@ -3,6 +3,24 @@
 :root {
   --background: #ffffff;
   --foreground: #09090b;
+
+  /* Design System Tokens */
+  --site-container: 36rem; /* max-w-xl (Padrão para booking flow) */
+  --section-gap: 5rem;     /* py-20 */
+  --component-gap: 3rem;   /* space-y-12 */
+  
+  /* Shared Transitions */
+  --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: all 0.2s ease;
+}
+
+/* Base resets or helper components if needed */
+.site-main-container {
+  max-width: var(--site-container);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 body {

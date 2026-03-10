@@ -12,8 +12,11 @@ const customerSchema = z.object({
 });
 
 export const GET = withTenant(async (request, { db }) => {
+    const { searchParams } = new URL(request.url);
+    const q = searchParams.get('q');
     const repo = new CustomersRepository(db.tenantId);
-    const customers = await repo.getAll();
+    // Usamos getAllWithStats para a listagem principal do CRM
+    const customers = q ? await repo.search(q) : await repo.getAllWithStats();
     return apiResponse(customers);
 });
 

@@ -14,7 +14,8 @@ import {
     Search,
     Plus,
     BarChart3,
-    Clock
+    Clock,
+    ClipboardList
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/app/components/ui/core";
@@ -24,6 +25,7 @@ const navSections = [
         title: "Operação",
         items: [
             { href: "/crm/dashboard", label: "Dashboard", icon: BarChart3 },
+            { href: "/crm/checkin", label: "Balcão (Check-in)", icon: ClipboardList },
             { href: "/crm/calendar", label: "Calendário", icon: Calendar },
             { href: "/crm/schedule", label: "Grade de Trabalho", icon: Clock },
             { href: "/crm/customers", label: "Clientes", icon: Users },

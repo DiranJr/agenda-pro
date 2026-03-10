@@ -30,16 +30,18 @@ model Tenant {
   slug             String   @unique
   timezone         String   @default("UTC")
   slotStep         Int      @default(30) // em minutos (slot de agenda)
+  plan             String   @default("start") // "start" ou "advanced"
   
-  // Configurações do mini site
+  // Configurações do mini site (Nova Estrutura Consolidada)
+  website          Json?    // { templateId, content: { brandName, headline, ... }, flags: { showPrices, ... }, style: { primaryColor } }
+  
+  // Campos Legados (Mantidos para migração conforme Etapa 2 do plano)
   templateId       String   @default("lash-beauty")
   customization    Json?    // { logoUrl, heroTitle, heroSubtitle, galleryUrls[], whatsapp, showPrices }
-  publishedAt      DateTime?
-  isPublished      Boolean  @default(false)
-
-  // Campos legados (manter por compatibilidade durante transição)
   websiteConfig    Json?    
   theme            Json?    
+  publishedAt      DateTime?
+  isPublished      Boolean  @default(false)
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -51,6 +53,7 @@ model Tenant {
   appointments     Appointment[]
   blocks           Block[]
   users            User[]
+  staffServices    StaffService[]
 
   @@index([slug])
 }
@@ -130,6 +133,7 @@ model Staff {
 
   @@index([tenantId])
   @@index([locationId])
+  @@unique([tenantId, name])
 }
 
 model Service {
@@ -154,6 +158,7 @@ model Service {
   updatedAt    DateTime @updatedAt
 
   @@index([tenantId])
+  @@unique([tenantId, name])
 }
 
 // Tabela dinâmica para definir quais profissionais fazem quais serviços
@@ -166,7 +171,11 @@ model StaffService {
   staff     Staff    @relation(fields: [staffId], references: [id])
   service   Service  @relation(fields: [serviceId], references: [id])
 
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
   @@id([staffId, serviceId])
+  @@index([tenantId])
 }
 
 model Customer {

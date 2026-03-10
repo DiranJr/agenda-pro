@@ -2,7 +2,7 @@ import { getRequestContext } from "@/lib/context";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import PublicHomeUI from "./PublicHomeUI";
-import { SITE_TEMPLATES } from "@/lib/siteTemplates";
+import { getTenantWebsite } from "@/lib/getTenantWebsite";
 
 export async function generateMetadata({ params }) {
     const { slug } = await params;
@@ -10,18 +10,17 @@ export async function generateMetadata({ params }) {
 
     if (!tenant) return { title: 'Agenda Pro' };
 
-    const customization = tenant.customization || {};
-    const template = SITE_TEMPLATES[tenant.templateId || 'lash-beauty'] || SITE_TEMPLATES['lash-beauty'];
-    const title = customization.heroTitle || template.defaults.heroTitle;
-    const description = customization.heroSubtitle || template.defaults.heroSubtitle;
+    const website = getTenantWebsite(tenant);
+    const title = website.content.brandName || tenant.name;
+    const headline = website.content.headline;
 
     return {
-        title: `${tenant.name} - ${title}`,
-        description: description,
+        title: `${title} - ${headline}`,
+        description: website.content.subheadline,
         openGraph: {
-            title: tenant.name,
-            description: description,
-            images: customization.logoUrl ? [customization.logoUrl] : [],
+            title: title,
+            description: website.content.subheadline,
+            images: website.content.logoUrl ? [website.content.logoUrl] : [],
         },
         viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
     };

@@ -1,19 +1,24 @@
 "use client";
-import GlowTemplate from "./GlowTemplate";
-import VelvetTemplate from "./VelvetTemplate";
-import ModernTemplate from "./ModernTemplate";
+import BeautySoft from "./layouts/BeautySoft";
+import PremiumDark from "./layouts/PremiumDark";
+import CleanClinic from "./layouts/CleanClinic";
+import ModernStudio from "./layouts/ModernStudio";
+import { SITE_TEMPLATES } from "@/lib/siteTemplates";
 
-export const TEMPLATE_LAYOUTS = {
-    "lash-beauty": GlowTemplate,
-    "dark-luxury": VelvetTemplate,
-    "natural-spa": GlowTemplate,
-    "urban-barber": VelvetTemplate,
-    "skin-premium": ModernTemplate,
-    "fitness-studio": ModernTemplate,
-    "wellness-clinic": ModernTemplate,
-    "makeup-artist": GlowTemplate,
+/**
+ * TECHNICAL_LAYOUT_COMPONENTS maps the technical layout ID to the React Component.
+ */
+export const TECHNICAL_LAYOUT_COMPONENTS = {
+    "beauty-soft": BeautySoft,
+    "premium-dark": PremiumDark,
+    "clean-clinic": CleanClinic,
+    "modern-studio": ModernStudio,
 };
 
+/**
+ * Resolves the layout component for a given commercial template ID.
+ */
 export function getTemplateLayout(templateId) {
-    return TEMPLATE_LAYOUTS[templateId] || GlowTemplate;
+    const templateDef = SITE_TEMPLATES[templateId] || SITE_TEMPLATES["lash-beauty"];
+    return TECHNICAL_LAYOUT_COMPONENTS[templateDef.layout] || BeautySoft;
 }

@@ -41,6 +41,13 @@ export function HeroSection({ title, subtitle, logoUrl, radius, tokens }) {
 }
 
 export function ServiceSection({ services, onSelect, showPrices, radius, tokens, isMobile }) {
+    if (!services || services.length === 0) {
+        return (
+            <div className="p-12 text-center bg-zinc-50 rounded-[2rem] border border-dashed border-zinc-200">
+                <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Nenhum serviço disponível no momento.</p>
+            </div>
+        );
+    }
     return (
         <section className="space-y-6" role="region" aria-label="Lista de Serviços">
             <h2 className={cn("text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-center", tokens.label)}>Nossos Serviços</h2>
@@ -99,6 +106,15 @@ export function GallerySection({ gallery, radius, tokens }) {
 
 export function StaffSection({ staff, booking, onSelect, radius, tokens, primaryColor }) {
     const filteredStaff = staff.filter(st => !booking.service || st.services.some(s => s.serviceId === booking.service.id));
+
+    if (filteredStaff.length === 0) {
+        return (
+            <div className="p-12 text-center bg-zinc-50 rounded-[2rem] border border-dashed border-zinc-200">
+                <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Nenhum profissional disponível para este serviço.</p>
+            </div>
+        );
+    }
+
     return (
         <section className="space-y-8">
             <h2 className={cn("text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-center", tokens.label)}>Escolha o Profissional</h2>
