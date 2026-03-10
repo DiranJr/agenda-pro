@@ -5,6 +5,7 @@ import CleanClinic from "./layouts/CleanClinic";
 import ModernStudio from "./layouts/ModernStudio";
 import ManicurePastel from "./layouts/ManicurePastel";
 import BarberClean from "./layouts/BarberClean";
+import ElegantGlow from "./layouts/ElegantGlow";
 import { SITE_TEMPLATES } from "@/lib/siteTemplates";
 
 /**
@@ -17,6 +18,7 @@ export const TECHNICAL_LAYOUT_COMPONENTS = {
     "modern-studio": ModernStudio,
     "manicure-pastel": ManicurePastel,
     "barber-clean": BarberClean,
+    "elegant-glow": ElegantGlow,
 };
 
 /**
@@ -24,5 +26,5 @@ export const TECHNICAL_LAYOUT_COMPONENTS = {
  */
 export function getTemplateLayout(templateId) {
     const templateDef = SITE_TEMPLATES[templateId] || SITE_TEMPLATES["lash-beauty"];
-    return TECHNICAL_LAYOUT_COMPONENTS[templateDef.layout] || BeautySoft;
+    return TECHNICAL_LAYOUT_COMPONENTS[templateDef.layout] || ElegantGlow;
 }

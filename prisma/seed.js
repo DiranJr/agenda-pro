@@ -13,12 +13,25 @@ async function main() {
         update: {
             plan: 'pro',
             websiteConfig: {
-                templateId: 'lash-beauty',
-                heroTitle: 'Studio Josy Silva',
-                heroSubtitle: 'Especialista em Cílios e Sobrancelhas',
-                aboutText: 'Mais que um salão, um refúgio para sua beleza.',
-                contactWhatsapp: '5511999999999',
-                heroImageUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=1200',
+                templateId: 'elegant-glow',
+                content: {
+                    brandName: 'Studio Josy Silva',
+                    headline: 'BELEZA QUE SE REVELA',
+                    subheadline: 'Onde cada detalhe é planejado para realçar sua essência única.',
+                    logoUrl: 'https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&q=80&w=200',
+                    heroImageUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=1200',
+                    galleryUrls: [
+                        'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&q=80&w=600',
+                        'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=600',
+                        'https://images.unsplash.com/photo-1620331311520-246422fd82f9?auto=format&fit=crop&q=80&w=600',
+                        'https://images.unsplash.com/photo-1595475243692-39292020a6c5?auto=format&fit=crop&q=80&w=600',
+                    ],
+                    whatsapp: '5511999999999',
+                    address: 'Av. das Orquídeas, 100 - Jd. Europa, São Paulo'
+                },
+                style: {
+                    primaryColor: '#8B5CF6'
+                }
             }
         },
         create: {
@@ -27,12 +40,25 @@ async function main() {
             plan: 'pro',
             timezone: 'America/Sao_Paulo',
             websiteConfig: {
-                templateId: 'lash-beauty',
-                heroTitle: 'Studio Josy Silva',
-                heroSubtitle: 'Especialista em Cílios e Sobrancelhas',
-                aboutText: 'Mais que um salão, um refúgio para sua beleza.',
-                contactWhatsapp: '5511999999999',
-                heroImageUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=1200',
+                templateId: 'elegant-glow',
+                content: {
+                    brandName: 'Studio Josy Silva',
+                    headline: 'BELEZA QUE SE REVELA',
+                    subheadline: 'Onde cada detalhe é planejado para realçar sua essência única.',
+                    logoUrl: 'https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&q=80&w=200',
+                    heroImageUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=1200',
+                    galleryUrls: [
+                        'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&q=80&w=600',
+                        'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=600',
+                        'https://images.unsplash.com/photo-1620331311520-246422fd82f9?auto=format&fit=crop&q=80&w=600',
+                        'https://images.unsplash.com/photo-1595475243692-39292020a6c5?auto=format&fit=crop&q=80&w=600',
+                    ],
+                    whatsapp: '5511999999999',
+                    address: 'Av. das Orquídeas, 100 - Jd. Europa, São Paulo'
+                },
+                style: {
+                    primaryColor: '#8B5CF6'
+                }
             },
             theme: {
                 layoutVariant: 'elegant',

@@ -19,7 +19,8 @@ import {
     ChevronRight,
     Share2,
     ExternalLink,
-    AlertTriangle
+    AlertTriangle,
+    Scissors
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { PageHeader } from "@/app/components/ui/forms";
