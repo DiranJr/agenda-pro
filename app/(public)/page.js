@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { PLANS } from "@/lib/plans";
 import {
   Calendar,
   Clock,
@@ -212,59 +213,74 @@ export default function LandingPage() {
               <p className="text-4xl md:text-6xl font-black text-zinc-900 tracking-tighter font-syne">Escolha sua escala.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-              {/* Plano Start */}
-              <div className="p-12 bg-white rounded-[3rem] border border-zinc-100 shadow-2xl relative overflow-hidden group">
-                <div className="space-y-8 relative z-10">
-                  <div className="space-y-1">
-                    <h3 className="text-2xl font-black text-zinc-900 uppercase">Plano Start</h3>
-                    <p className="text-zinc-400 text-sm font-bold uppercase tracking-widest">Para quem está começando</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {Object.entries(PLANS).map(([planId, plan], index) => {
+                const isFeatured = planId === 'pro';
+                return (
+                  <div key={planId} className={cn(
+                    "p-10 rounded-[3rem] relative overflow-hidden group shadow-2xl transition-all duration-300",
+                    isFeatured
+                      ? "bg-indigo-600 text-white shadow-indigo-200 scale-105"
+                      : "bg-white border border-zinc-100 text-zinc-900"
+                  )}>
+                    {isFeatured && (
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-bl-[6rem] -mr-12 -mt-12 group-hover:scale-110 transition-transform" />
+                    )}
+                    {isFeatured && (
+                      <div className="absolute top-8 right-8 bg-white/20 backdrop-blur-md text-white text-[8px] font-black uppercase px-3 py-1.5 rounded-full tracking-widest relative z-20">
+                        Mais Popular
+                      </div>
+                    )}
+
+                    <div className="space-y-8 relative z-10 h-full flex flex-col">
+                      <div className="space-y-1">
+                        <h3 className={cn("text-2xl font-black uppercase", isFeatured ? "text-white" : "text-zinc-900")}>
+                          Plano {plan.name}
+                        </h3>
+                        <p className={cn("text-sm font-bold uppercase tracking-widest", isFeatured ? "text-white/60" : "text-zinc-400")}>
+                          {index === 0 ? "Para quem está começando" : index === 1 ? "Gestão Avançada" : "O Controle Total"}
+                        </p>
+                      </div>
+
+                      <div className={cn("text-4xl font-black font-syne", isFeatured ? "text-white" : "text-zinc-900")}>
+                        {plan.price}
+                      </div>
+
+                      <ul className="space-y-4 flex-1">
+                        <li className={cn("flex items-center gap-3 text-sm font-bold", isFeatured ? "text-white" : "text-zinc-600")}>
+                          <Users className={cn("w-5 h-5 shrink-0", isFeatured ? "text-indigo-200" : "text-indigo-400")} />
+                          {plan.limits.staff === 999 ? 'Profissionais Ilimitados' : `Até ${plan.limits.staff} Profissionais`}
+                        </li>
+                        <li className={cn("flex items-center gap-3 text-sm font-bold", isFeatured ? "text-white" : "text-zinc-600")}>
+                          <Scissors className={cn("w-5 h-5 shrink-0", isFeatured ? "text-indigo-200" : "text-indigo-400")} />
+                          {plan.limits.services === 999 ? 'Serviços Ilimitados' : `Até ${plan.limits.services} Serviços`}
+                        </li>
+                        <li className={cn("flex items-center gap-3 text-sm font-bold", isFeatured ? "text-white" : "text-zinc-600")}>
+                          <CheckCircle2 className={cn("w-5 h-5 shrink-0", isFeatured ? "text-indigo-200" : "text-indigo-400")} />
+                          {plan.features.includes('appointments') && 'Agenda Ilimitada'}
+                        </li>
+                        <li className={cn("flex items-center gap-3 text-sm font-bold", isFeatured ? "text-white" : "text-zinc-600")}>
+                          <CheckCircle2 className={cn("w-5 h-5 shrink-0", isFeatured ? "text-indigo-200" : "text-indigo-400")} />
+                          {plan.features.includes('basic_crm') && 'CRM e Notificações'}
+                        </li>
+                        <li className={cn("flex items-center gap-3 text-sm font-bold", isFeatured ? "text-white" : "text-zinc-600")}>
+                          <CheckCircle2 className={cn("w-5 h-5 shrink-0", isFeatured ? "text-indigo-200" : "text-indigo-400")} />
+                          {plan.features.includes('finance_reports') && 'Relatórios Financeiros'}
+                        </li>
+                      </ul>
+
+                      <button className={cn(
+                        "w-full py-5 rounded-[2rem] font-black uppercase tracking-widest text-sm transition-all mt-8 shadow-xl",
+                        isFeatured
+                          ? "bg-white text-indigo-600 hover:scale-105"
+                          : "bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
+                      )}>
+                        Escolher {plan.name}
+                      </button>
+                    </div>
                   </div>
-                  <div className="text-5xl font-black text-zinc-900 font-syne">R$ 299,99<span className="text-xs font-medium text-zinc-400">/mês</span></div>
-
-                  <ul className="space-y-4">
-                    {["Até 3 Profissionais", "Agenda Ilimitada", "Mini Site (All Layouts)", "WhatsApp de Confirmação", "Lista de Clientes", "Dash Individual"].map(item => (
-                      <li key={item} className="flex items-center gap-3 text-sm font-bold text-zinc-600 underline decoration-indigo-200 underline-offset-4 decoration-2">
-                        <CheckCircle2 className="w-5 h-5 text-indigo-400" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <button className="w-full py-6 bg-zinc-100 text-zinc-900 rounded-[2rem] font-black uppercase tracking-widest text-sm hover:bg-zinc-200 transition-all">
-                    Começar com Start
-                  </button>
-                </div>
-              </div>
-
-              {/* Plano Advanced */}
-              <div className="p-12 bg-indigo-600 rounded-[3rem] shadow-2xl shadow-indigo-200 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-bl-[6rem] -mr-12 -mt-12 group-hover:scale-110 transition-transform" />
-                <div className="absolute top-10 right-10 bg-white/20 backdrop-blur-md text-white text-[8px] font-black uppercase px-3 py-1.5 rounded-full tracking-widest relative z-20">
-                  Mais Recomendado
-                </div>
-
-                <div className="space-y-8 relative z-10">
-                  <div className="space-y-1">
-                    <h3 className="text-2xl font-black text-white uppercase">Gestão Avançada</h3>
-                    <p className="text-white/60 text-sm font-bold uppercase tracking-widest text-white/50">Para quem domina o mercado</p>
-                  </div>
-                  <div className="text-5xl font-black text-white font-syne">R$ 399,99<span className="text-xs font-medium text-white/50">/mês</span></div>
-
-                  <ul className="space-y-4">
-                    {["Profissionais Ilimitados", "Múltiplas Unidades", "Financeiro Avançado", "Relatórios de Comissão", "Exportação de Dados", "Suporte 24h Prioritário"].map(item => (
-                      <li key={item} className="flex items-center gap-3 text-sm font-bold text-white">
-                        <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <button className="w-full py-6 bg-white text-indigo-600 rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-xl hover:scale-105 transition-all">
-                    Contratar Avançado
-                  </button>
-                </div>
-              </div>
+                )
+              })}
             </div>
           </div>
         </section>

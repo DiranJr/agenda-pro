@@ -28,6 +28,16 @@ import { Button, Card } from "@/app/components/ui/core";
 import { Badge } from "@/app/components/ui/forms";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    Cell
+} from 'recharts';
 
 export default function DashboardPage() {
     const [stats, setStats] = useState(null);
@@ -181,33 +191,68 @@ export default function DashboardPage() {
                             </h2>
                             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Últimos 7 dias</span>
                         </div>
-                        <Card padding="p-10">
-                            <div className="h-64 flex items-end justify-between gap-4">
-                                {stats?.chartData?.map((day, i) => {
-                                    const maxVal = Math.max(...stats.chartData.map(d => d.value), 1);
-                                    const height = (day.value / maxVal) * 100;
-                                    return (
-                                        <div key={i} className="flex-1 flex flex-col items-center gap-4 group">
-                                            <div className="relative w-full flex flex-col items-center group">
-                                                <div className="absolute bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-zinc-900 text-white text-[10px] font-black px-2 py-1 rounded-lg">
-                                                    R$ {day.value.toFixed(0)}
-                                                </div>
-                                                <motion.div
-                                                    initial={{ height: 0 }}
-                                                    animate={{ height: `${height}%` }}
-                                                    transition={{ delay: i * 0.1, duration: 0.8, ease: "circOut" }}
-                                                    className={cn(
-                                                        "w-full max-w-[40px] rounded-t-xl transition-all",
-                                                        day.value === maxVal ? "bg-indigo-600 shadow-lg shadow-indigo-100" : "bg-zinc-100 group-hover:bg-indigo-200"
-                                                    )}
-                                                />
-                                            </div>
-                                            <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                                                {DateTime.fromISO(day.date).toFormat('ccc')}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                        <Card padding="p-8">
+                            <div className="h-72 w-full">
+                                {stats?.chartData && stats.chartData.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart
+                                            data={stats.chartData}
+                                            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                                        >
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
+                                            <XAxis
+                                                dataKey="date"
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tick={{ fill: '#a1a1aa', fontSize: 10, fontWeight: 900 }}
+                                                dy={10}
+                                                tickFormatter={(str) => DateTime.fromISO(str).toFormat('dd/MM')}
+                                            />
+                                            <YAxis
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tick={{ fill: '#a1a1aa', fontSize: 10, fontWeight: 900 }}
+                                                tickFormatter={(val) => `R$${val}`}
+                                            />
+                                            <Tooltip
+                                                cursor={{ fill: '#f8fafc' }}
+                                                content={({ active, payload }) => {
+                                                    if (active && payload && payload.length) {
+                                                        return (
+                                                            <div className="bg-zinc-900 text-white p-3 rounded-xl shadow-2xl border border-zinc-800">
+                                                                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">
+                                                                    {DateTime.fromISO(payload[0].payload.date).toFormat("dd 'de' MMMM")}
+                                                                </p>
+                                                                <p className="text-sm font-black text-indigo-400">
+                                                                    R$ {payload[0].value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                                </p>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                }}
+                                            />
+                                            <Bar
+                                                dataKey="value"
+                                                radius={[8, 8, 8, 8]}
+                                                barSize={40}
+                                            >
+                                                {stats.chartData.map((entry, index) => (
+                                                    <Cell
+                                                        key={`cell-${index}`}
+                                                        fill={entry.value === Math.max(...stats.chartData.map(d => d.value)) ? '#6366f1' : '#f4f4f5'}
+                                                        className="hover:fill-indigo-400 transition-colors duration-300"
+                                                    />
+                                                ))}
+                                            </Bar>
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="h-full flex flex-col items-center justify-center text-center">
+                                        <TrendingUp className="w-12 h-12 text-zinc-100 mb-4" />
+                                        <p className="text-zinc-400 font-bold uppercase tracking-widest text-xs">Sem dados suficientes para gerar o gráfico</p>
+                                    </div>
+                                )}
                             </div>
                         </Card>
                     </div>

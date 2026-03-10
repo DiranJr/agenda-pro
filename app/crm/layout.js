@@ -16,7 +16,8 @@ import {
     BarChart3,
     Clock,
     ClipboardList,
-    Lock
+    Lock,
+    CreditCard
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/app/components/ui/core";
@@ -46,6 +47,7 @@ const navSections = [
         items: [
             { href: "/crm/website", label: "Meu Site", icon: Globe },
             { href: "/crm/settings", label: "Ajustes", icon: Settings },
+            { href: "/crm/plano", label: "Meu Plano", icon: CreditCard },
         ],
     },
 ];

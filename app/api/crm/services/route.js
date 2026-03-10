@@ -31,6 +31,19 @@ export const POST = withTenant(async (request, { db }) => {
         }
 
         const repo = new ServicesRepository(db.tenantId);
+
+        // Limitação por Plano
+        const { getLimit } = await import("@/lib/plans");
+        const { prisma } = await import("@/lib/prisma");
+        const currentCount = await prisma.service.count({
+            where: { tenantId: db.tenantId, active: true }
+        });
+        const limit = getLimit(tenant.plan, "services");
+
+        if (currentCount >= limit) {
+            return apiError('FORBIDDEN', `Seu plano (${tenant.plan.toUpperCase()}) permite no máximo ${limit} serviços ativos.`);
+        }
+
         const service = await repo.create(result.data);
         return apiResponse(service, 201);
     } catch (err) {
