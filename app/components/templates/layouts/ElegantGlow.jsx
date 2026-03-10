@@ -80,60 +80,92 @@ export default function ElegantGlow({ tenant, services, staff, booking, step, se
     return (
         <div className="min-h-screen bg-[#FFFDFE] text-zinc-900 font-sans selection:bg-pink-100">
             {/* Elegant Header */}
-            <nav className="fixed top-0 w-full z-50 bg-white/60 backdrop-blur-xl border-b border-zinc-100 shadow-sm">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        {content.logoUrl && (
-                            <img src={content.logoUrl} alt="Logo" className="h-10 w-10 object-contain" />
+            <nav className="fixed top-0 w-full z-50 bg-white/40 backdrop-blur-2xl border-b border-white/20 shadow-sm transition-all duration-300">
+                <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+                    <div className="flex items-center gap-4 group cursor-pointer">
+                        {content.logoUrl ? (
+                            <div className="h-12 w-12 rounded-2xl bg-white shadow-inner p-2 border border-zinc-100 group-hover:rotate-6 transition-transform">
+                                <img src={content.logoUrl} alt="Logo" className="w-full h-full object-contain" />
+                            </div>
+                        ) : (
+                            <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white" style={{ backgroundColor: primaryColor }}>
+                                <Sparkles className="w-6 h-6" />
+                            </div>
                         )}
-                        <span className="text-xl font-black uppercase tracking-widest text-zinc-900">{content.brandName || tenant.name}</span>
+                        <span className="text-2xl font-black uppercase tracking-tighter text-zinc-900 group-hover:tracking-widest transition-all duration-500">{content.brandName || tenant.name}</span>
                     </div>
-                    <button
-                        onClick={() => document.getElementById('booking-view').scrollIntoView({ behavior: 'smooth' })}
-                        className="px-6 py-2.5 bg-zinc-900 text-white rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-zinc-200"
-                        style={{ backgroundColor: primaryColor }}
-                    >
-                        Agendar Agora
-                    </button>
+                    <div className="hidden lg:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+                        <a href="#booking-view" className="hover:text-zinc-900 transition-colors">Serviços</a>
+                        <a href="#info" className="hover:text-zinc-900 transition-colors">Contato</a>
+                        <button
+                            onClick={() => document.getElementById('booking-view').scrollIntoView({ behavior: 'smooth' })}
+                            className="px-8 py-3.5 bg-zinc-900 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:shadow-2xl hover:shadow-zinc-300 active:scale-95 transition-all"
+                            style={{ backgroundColor: primaryColor }}
+                        >
+                            Agendar
+                        </button>
+                    </div>
                 </div>
             </nav>
 
             {/* Premium Hero Section */}
-            <header className="relative pt-32 pb-40 lg:pt-48 lg:pb-64 overflow-hidden">
+            <header className="relative pt-48 pb-56 lg:pt-64 lg:pb-80 overflow-hidden">
+                {/* Floating Decorative Shapes */}
+                <div className="absolute top-20 -left-20 w-96 h-96 bg-indigo-200/20 rounded-full blur-[120px] animate-pulse" />
+                <div className="absolute top-40 -right-20 w-[30rem] h-[30rem] bg-pink-200/20 rounded-full blur-[150px]" style={{ backgroundColor: `${primaryColor}15` }} />
+
                 <div className="absolute inset-0 -z-10">
                     <img
                         src={content.heroImageUrl || "/images/placeholders/manicure-hero.jpg"}
                         alt="Hero"
-                        className="w-full h-full object-cover opacity-10 blur-[80px] scale-125"
+                        className="w-full h-full object-cover opacity-[0.03] scale-150"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-white via-white/40 to-white" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white" />
                 </div>
 
-                <div className="max-w-7xl mx-auto px-6 text-center space-y-8 relative">
+                <div className="max-w-7xl mx-auto px-6 text-center space-y-12 relative">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur border border-zinc-100 rounded-full text-zinc-400 text-[10px] font-black uppercase tracking-widest shadow-sm"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="inline-flex items-center gap-3 px-6 py-2.5 bg-white border border-zinc-100 rounded-full text-zinc-400 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-zinc-100/50"
                     >
-                        <Sparkles className="w-3 h-3 text-amber-400" /> Experiência Exclusiva
+                        <span className="w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: primaryColor }} />
+                        Experiência High-End
                     </motion.div>
 
                     <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-6xl md:text-8xl font-black tracking-tight text-zinc-900 leading-[0.85]"
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="text-7xl md:text-[10rem] font-black tracking-tighter text-zinc-900 leading-[0.8] mix-blend-darken"
                     >
                         {content.headline || "Beleza que se revela."}
                     </motion.h1>
 
                     <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-lg md:text-xl text-zinc-500 max-w-2xl mx-auto font-medium"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 1 }}
+                        className="text-xl md:text-2xl text-zinc-400 max-w-2xl mx-auto font-medium leading-relaxed tracking-tight"
                     >
                         {content.subheadline || "Cuidado premium e atendimento personalizado em um ambiente sofisticado."}
                     </motion.p>
+
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.6 }}
+                        className="pt-6"
+                    >
+                        <button
+                            onClick={() => document.getElementById('booking-view').scrollIntoView({ behavior: 'smooth' })}
+                            className="group relative px-16 py-8 bg-zinc-900 text-white rounded-full text-sm font-black uppercase tracking-[0.4em] overflow-hidden"
+                            style={{ backgroundColor: primaryColor }}
+                        >
+                            <span className="relative z-10">Explorar Serviços</span>
+                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                        </button>
+                    </motion.div>
                 </div>
 
                 {/* Floating Gallery Elements */}
@@ -141,7 +173,7 @@ export default function ElegantGlow({ tenant, services, staff, booking, step, se
                     <div className="absolute bottom-10 left-0 w-full overflow-hidden opacity-30 select-none pointer-events-none hidden lg:block">
                         <div className="flex gap-10 whitespace-nowrap animate-marquee">
                             {[...content.galleryUrls, ...content.galleryUrls].map((url, i) => (
-                                <img key={i} src={url} className="h-48 w-48 object-cover rounded-[3rem] shadow-xl grayscale hover:grayscale-0 transition-all" />
+                                <img key={i} src={url} className="h-48 w-48 object-cover rounded-[3rem] shadow-xl grayscale hover:grayscale-0 transition-all px-2" />
                             ))}
                         </div>
                     </div>
