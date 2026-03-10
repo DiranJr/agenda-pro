@@ -15,7 +15,7 @@ export const GET = withFeature('finance_reports', async (request, { db, tenant }
         const repo = new FinanceRepository(db.tenantId, tenant.timezone);
         const report = await repo.getReport({ startDate, endDate });
 
-        return apiResponse(report);
+        return apiResponse({ ...report, tenantPlan: tenant.plan });
     } catch (err) {
         return apiError('SERVER_ERROR', null, err.message);
     }

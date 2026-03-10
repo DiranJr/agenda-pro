@@ -18,7 +18,8 @@ import {
     Target,
     Award,
     FileSpreadsheet,
-    ChevronDown
+    ChevronDown,
+    Zap
 } from "lucide-react";
 import { PageHeader, Input, Select } from "@/app/components/ui/forms";
 import { Button, Card } from "@/app/components/ui/core";
@@ -26,6 +27,14 @@ import { Badge } from "@/app/components/ui/forms";
 import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import { DateTime } from "luxon";
+import {
+    PieChart as RechartsPieChart,
+    Pie,
+    Cell,
+    ResponsiveContainer,
+    Tooltip
+} from 'recharts';
+import { PLANS, hasFeature } from "@/lib/plans";
 
 export default function FinancePage() {
     const [loading, setLoading] = useState(true);
@@ -50,7 +59,13 @@ export default function FinancePage() {
         loadReport();
     }, [loadReport]);
 
+    const canExport = report?.tenantPlan ? hasFeature(report.tenantPlan, 'data_export') || report.tenantPlan === 'enterprise' : false;
+
     const handleExport = () => {
+        if (!canExport) {
+            toast.error("Upgrade para o plano Avançado para exportar relatórios.");
+            return;
+        }
         // Implementar export CSV simples
         const headers = ["Data", "Cliente", "Serviço", "Profissional", "Valor", "Status"];
         const rows = report.appointments.map(a => [
@@ -108,10 +123,14 @@ export default function FinancePage() {
                         <Button
                             onClick={handleExport}
                             variant="indigo"
-                            className="rounded-2xl h-12 px-6 shadow-lg shadow-indigo-100 text-xs font-black uppercase tracking-widest gap-2"
+                            className={cn(
+                                "rounded-2xl h-12 px-6 shadow-lg shadow-indigo-100 text-xs font-black uppercase tracking-widest gap-2 relative",
+                                !canExport && "opacity-75 grayscale bg-zinc-400 border-none pointer-events-auto"
+                            )}
                         >
+                            {!canExport && <div className="absolute top-0 right-0 -mr-2 -mt-2 bg-indigo-600 w-5 h-5 rounded-full flex items-center justify-center text-[10px]"><Zap className="w-3 h-3 text-white" /></div>}
                             <FileSpreadsheet className="w-4 h-4 pointer-events-none" />
-                            Exportar CSV
+                            {canExport ? "Exportar CSV" : "Exportar (PRO)"}
                         </Button>
                     </div>
                 }
@@ -247,32 +266,48 @@ export default function FinancePage() {
                     </h2>
 
                     <Card padding="p-8">
-                        <div className="space-y-8">
-                            {report?.categoryData.map((cat, i) => {
-                                const percentage = (cat.value / report.stats.totalRevenue) * 100;
-                                return (
-                                    <div key={i} className="space-y-2">
-                                        <div className="flex justify-between items-end">
-                                            <span className="text-sm font-black text-zinc-900 uppercase tracking-tight">{cat.name}</span>
-                                            <span className="text-xs font-bold text-zinc-400 italic">R$ {cat.value.toFixed(2)}</span>
-                                        </div>
-                                        <div className="h-2 w-full bg-zinc-50 rounded-full overflow-hidden">
-                                            <motion.div
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${percentage}%` }}
-                                                className="h-full bg-indigo-600 rounded-full"
-                                            />
-                                        </div>
-                                        <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest text-right">
-                                            {percentage.toFixed(1)}% do total
-                                        </div>
-                                    </div>
-                                );
-                            })}
-
-                            {report?.categoryData.length === 0 && (
-                                <p className="text-zinc-400 text-sm italic text-center py-10">Sem dados de categorias.</p>
+                        <div className="h-64 w-full">
+                            {report?.categoryData && report.categoryData.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <RechartsPieChart>
+                                        <Pie
+                                            data={report.categoryData}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={80}
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                        >
+                                            {report.categoryData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={['#6366f1', '#a855f7', '#ec4899', '#f43f5e', '#facc15'][index % 5]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip
+                                            formatter={(value) => `R$ ${value.toFixed(2)}`}
+                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                            itemStyle={{ fontWeight: 900 }}
+                                        />
+                                    </RechartsPieChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <p className="text-zinc-400 text-sm italic text-center py-10 mt-10">Sem dados de categorias.</p>
                             )}
+                        </div>
+                        <div className="space-y-3 mt-6">
+                            {report?.categoryData?.map((cat, i) => {
+                                const percentage = (cat.value / report.stats.totalRevenue) * 100;
+                                const color = ['bg-indigo-500', 'bg-purple-500', 'bg-pink-500', 'bg-rose-500', 'bg-yellow-400'][i % 5];
+                                return (
+                                    <div key={i} className="flex justify-between items-center text-sm">
+                                        <div className="flex items-center gap-2">
+                                            <span className={cn("w-3 h-3 rounded-full", color)} />
+                                            <span className="font-bold text-zinc-600">{cat.name}</span>
+                                        </div>
+                                        <span className="font-black text-zinc-900">{percentage.toFixed(1)}%</span>
+                                    </div>
+                                )
+                            })}
                         </div>
                     </Card>
 

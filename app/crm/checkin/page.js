@@ -118,7 +118,8 @@ export default function CheckinPage() {
                 toast.success("Atendimento registrado com sucesso!");
                 resetForm();
             } else {
-                toast.error("Erro ao registrar agendamento.");
+                const data = await res.json();
+                toast.error(data.message || "Erro ao registrar agendamento.");
             }
         } catch (e) {
             toast.error(e.message);

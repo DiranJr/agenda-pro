@@ -83,9 +83,26 @@ export default function DashboardPage() {
     };
 
     const handleShare = () => {
-        const url = `${window.location.origin}/studio-josy`; // Slug hardcoded por enquanto ou pegar do context
+        if (!stats?.slug) return;
+        const url = `${window.location.origin}/${stats.slug}`;
         navigator.clipboard.writeText(url);
         toast.success("Link copiado para o WhatsApp!");
+    };
+
+    const handleCompleteAppointment = async (id) => {
+        setAppointments(appointments.map(app => app.id === id ? { ...app, status: 'DONE' } : app));
+        toast.success("Atendimento concluído!");
+        try {
+            const res = await fetch(`/api/crm/appointments/${id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'DONE' }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (!res.ok) throw new Error();
+        } catch (e) {
+            toast.error("Erro ao atualizar!");
+            loadDashboard(); // revert on fail
+        }
     };
 
     return (
@@ -97,7 +114,7 @@ export default function DashboardPage() {
                         <Zap className="w-4 h-4" /> PERFORMANCE REALTIME
                     </div>
                     <h1 className="text-4xl font-black text-zinc-900 tracking-tight font-syne">
-                        {getTimeGreeting()}, <span className="text-indigo-600">Admin</span>
+                        {getTimeGreeting()}, <span className="text-indigo-600">{stats?.adminName || 'Admin'}</span>
                     </h1>
                     <div className="flex items-center gap-2 mt-2">
                         <p className="text-zinc-400 font-medium">{now.setLocale('pt-BR').toFormat("cccc, dd 'de' MMMM")}</p>
@@ -127,28 +144,38 @@ export default function DashboardPage() {
 
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                    { label: 'Faturamento Hoje', value: `R$ ${(stats?.todayRevenue || 0).toFixed(2)}`, sub: 'Realizado', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                    { label: 'Agendamentos', value: stats?.todayCount || 0, sub: 'Hoje', icon: CalendarIcon, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                    { label: 'Taxa No-Show', value: `${stats?.noShowRate || 0}%`, sub: 'Este mês', icon: AlertCircle, color: 'text-red-600', bg: 'bg-red-50' },
-                    { label: 'Captar Clientes', value: stats?.inactiveCount || 0, sub: 'Inativos +60d', icon: Users, color: 'text-amber-600', bg: 'bg-amber-50' },
-                ].map((stat, i) => (
-                    <Card key={i} padding="p-8" className="relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
-                        <div className={cn("absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full opacity-10 transition-transform group-hover:scale-110", stat.bg)} />
-                        <div className="relative z-10 space-y-6">
-                            <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner", stat.bg, stat.color)}>
-                                <stat.icon className="w-6 h-6" />
+                {loading ? (
+                    Array(4).fill(null).map((_, i) => (
+                        <Card key={i} padding="p-8" className="animate-pulse flex flex-col justify-between h-[180px]">
+                            <div className="w-12 h-12 bg-zinc-100 rounded-2xl" />
+                            <div className="space-y-3 mt-auto">
+                                <div className="h-8 bg-zinc-100 rounded-lg w-1/2" />
+                                <div className="h-4 bg-zinc-100 rounded-lg w-1/3" />
                             </div>
-                            <div>
-                                <h3 className="text-3xl font-black text-zinc-900 tracking-tighter">{stat.value}</h3>
-                                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mt-1">{stat.label}</p>
+                        </Card>
+                    ))
+                ) : (
+                    [
+                        { label: 'Faturamento Hoje', value: `R$ ${(stats?.todayRevenue || 0).toFixed(2)}`, sub: 'Realizado', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                        { label: 'Agendamentos', value: stats?.todayCount || 0, sub: 'Hoje', icon: CalendarIcon, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+                        { label: 'Taxa No-Show', value: `${stats?.noShowRate || 0}%`, sub: 'Este mês', icon: AlertCircle, color: 'text-red-600', bg: 'bg-red-50' },
+                        { label: 'Captar Clientes', value: stats?.inactiveCount || 0, sub: 'Inativos +60d', icon: Users, color: 'text-amber-600', bg: 'bg-amber-50' },
+                    ].map((stat, i) => (
+                        <Card key={i} padding="p-8" className="relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/30 rounded-bl-full -mr-16 -mt-16 group-hover:scale-110 transition-transform" />
+                            <div className="relative z-10 space-y-4">
+                                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner", stat.bg, stat.color)}>
+                                    <stat.icon className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{stat.label}</p>
+                                    <h3 className="text-3xl font-black text-zinc-900 leading-none mt-1 font-syne">{stat.value}</h3>
+                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-2 block">{stat.sub}</span>
+                                </div>
                             </div>
-                            <div className={cn("flex items-center gap-1 text-[10px] font-bold w-fit px-2 py-1 rounded-full", stat.bg, stat.color)}>
-                                {stat.sub}
-                            </div>
-                        </div>
-                    </Card>
-                ))}
+                        </Card>
+                    ))
+                )}
             </div>
 
             {/* Dashboard Layout */}
@@ -175,7 +202,7 @@ export default function DashboardPage() {
                                             <span className="flex items-center gap-2"><User className="w-4 h-4" /> {stats.nextAppointment.staff.name}</span>
                                         </div>
                                     </div>
-                                    <Button className="bg-white text-indigo-600 hover:bg-zinc-100 rounded-2xl h-16 px-10 font-black shadow-xl shrink-0">
+                                    <Button onClick={() => window.location.href = '/crm/customers'} className="bg-white text-indigo-600 hover:bg-zinc-100 rounded-2xl h-16 px-10 font-black shadow-xl shrink-0">
                                         VER FICHA
                                     </Button>
                                 </div>
@@ -306,7 +333,12 @@ export default function DashboardPage() {
                                                     <div className="text-xl font-black text-zinc-900">R$ {parseFloat(app.service.price).toFixed(2)}</div>
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <Button size="icon" variant="ghost" className="w-12 h-12 rounded-2xl bg-zinc-50 text-zinc-400 hover:bg-emerald-500 hover:text-white transition-all shadow-sm">
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        onClick={() => handleCompleteAppointment(app.id)}
+                                                        className="w-12 h-12 rounded-2xl bg-zinc-50 text-zinc-400 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                                                    >
                                                         <Check className="w-5 h-5" />
                                                     </Button>
                                                 </div>
@@ -343,9 +375,9 @@ export default function DashboardPage() {
                         <h2 className="text-sm font-black text-zinc-400 uppercase tracking-widest px-2">Ações Sugeridas</h2>
                         <div className="grid gap-4">
                             {[
-                                { title: 'No-Shows Altos', desc: 'Sua taxa de falta subiu 5% este mês.', action: 'Ver Clientes', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50' },
-                                { title: 'Horários Vazios', desc: 'Quarta à tarde está com pouca procura.', action: 'Lançar Promo', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50' },
-                                { title: 'Recuperar Clientes', desc: '8 clientes VIP não voltam há 45 dias.', action: 'Enviar Whats', icon: MessageCircle, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+                                ...(stats?.noShowRate > 0 ? [{ title: 'Faltas Identificadas', desc: `Sua taxa de falta está em ${stats.noShowRate}% este mês.`, action: 'Analisar', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50' }] : []),
+                                ...(stats?.inactiveCount > 0 ? [{ title: 'Recuperar Clientes', desc: `${stats.inactiveCount} inativos há +60 dias.`, action: 'Contatar', icon: MessageCircle, color: 'text-indigo-500', bg: 'bg-indigo-50' }] : []),
+                                ...((stats?.noShowRate === 0 && stats?.inactiveCount === 0) ? [{ title: 'Tudo perfeito!', desc: 'Sua operação está rodando sem problemas.', action: 'Ver Calendário', icon: Zap, color: 'text-emerald-500', bg: 'bg-emerald-50' }] : [])
                             ].map((item, i) => (
                                 <Card key={i} padding="p-6" className="flex items-start gap-4 hover:border-indigo-100 transition-all cursor-pointer">
                                     <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", item.bg, item.color)}>

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { PLANS } from "@/lib/plans";
+import { cn } from "@/lib/utils";
 import {
   Calendar,
   Clock,
@@ -18,7 +19,10 @@ import {
   Lock,
   Star,
   ChevronRight,
-  ClipboardList
+  ClipboardList,
+  Instagram,
+  Facebook,
+  Scissors
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -91,7 +95,7 @@ export default function LandingPage() {
               <a href="#planos" className="px-12 py-6 bg-indigo-600 text-white rounded-[2rem] text-lg font-black uppercase tracking-widest shadow-2xl shadow-indigo-300 hover:bg-indigo-700 hover:scale-105 transition-all">
                 Ver planos e preços
               </a>
-              <button className="px-10 py-6 text-zinc-900 font-black uppercase tracking-widest text-sm flex items-center gap-3 hover:bg-zinc-100 rounded-[2rem] transition-all">
+              <button onClick={() => window.location.href = '/studio-josy'} className="px-10 py-6 text-zinc-900 font-black uppercase tracking-widest text-sm flex items-center gap-3 hover:bg-zinc-100 rounded-[2rem] transition-all">
                 Ver demonstração <ArrowRight className="w-5 h-5" />
               </button>
             </motion.div>
@@ -174,10 +178,16 @@ export default function LandingPage() {
 
         {/* FEATURES GRID */}
         <section id="features" className="py-32 px-6">
-          <div className="max-w-7xl mx-auto space-y-20">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="max-w-7xl mx-auto space-y-20"
+          >
             <div className="text-center space-y-4">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-600">Arsenal de Guerra</h2>
-              <p className="text-4xl md:text-6xl font-black text-zinc-900 tracking-tighter font-syne">Tudo para dominar seu mercado.</p>
+              <motion.h2 variants={itemVariants} className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-600">Arsenal de Guerra</motion.h2>
+              <motion.p variants={itemVariants} className="text-4xl md:text-6xl font-black text-zinc-900 tracking-tighter font-syne">Tudo para dominar seu mercado.</motion.p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -192,25 +202,31 @@ export default function LandingPage() {
                 { icon: ClipboardList, title: "Balcão / Check-in", desc: "Agendamento rápido para clientes presenciais com 1 clique." },
                 { icon: Zap, title: "Alta Performance", desc: "Sistema ultrarrápido focado em converter visitantes em clientes pagantes." }
               ].map((f, i) => (
-                <div key={i} className="p-10 bg-white rounded-[2.5rem] border border-zinc-100 shadow-xl shadow-zinc-200/50 hover:shadow-2xl hover:border-indigo-100 transition-all group overflow-hidden relative">
+                <motion.div variants={itemVariants} key={i} className="p-10 bg-white rounded-[2.5rem] border border-zinc-100 shadow-xl shadow-zinc-200/50 hover:shadow-2xl hover:border-indigo-100 transition-all group overflow-hidden relative">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50/50 rounded-bl-[4rem] -mr-12 -mt-12 group-hover:scale-150 transition-transform" />
                   <div className="w-14 h-14 bg-zinc-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-8 group-hover:bg-indigo-600 group-hover:text-white transition-all relative z-10">
                     <f.icon className="w-7 h-7" />
                   </div>
                   <h3 className="text-xl font-black text-zinc-900 mb-4 font-syne relative z-10">{f.title}</h3>
                   <p className="text-zinc-500 leading-relaxed text-sm relative z-10">{f.desc}</p>
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* PLANOS DE PREÇO */}
         <section id="planos" className="py-32 px-6 bg-zinc-50">
-          <div className="max-w-7xl mx-auto space-y-20">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="max-w-7xl mx-auto space-y-20"
+          >
             <div className="text-center space-y-4">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-600">Investimento</h2>
-              <p className="text-4xl md:text-6xl font-black text-zinc-900 tracking-tighter font-syne">Escolha sua escala.</p>
+              <motion.h2 variants={itemVariants} className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-600">Investimento</motion.h2>
+              <motion.p variants={itemVariants} className="text-4xl md:text-6xl font-black text-zinc-900 tracking-tighter font-syne">Escolha sua escala.</motion.p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -269,7 +285,7 @@ export default function LandingPage() {
                         </li>
                       </ul>
 
-                      <button className={cn(
+                      <button onClick={() => window.location.href = '/login'} className={cn(
                         "w-full py-5 rounded-[2rem] font-black uppercase tracking-widest text-sm transition-all mt-8 shadow-xl",
                         isFeatured
                           ? "bg-white text-indigo-600 hover:scale-105"
@@ -282,7 +298,7 @@ export default function LandingPage() {
                 )
               })}
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* CTA FINAL */}
@@ -300,7 +316,7 @@ export default function LandingPage() {
                 <Link href="/login" className="px-12 py-6 bg-white text-zinc-900 rounded-3xl font-black uppercase tracking-widest text-sm hover:scale-105 transition-all">
                   Começar agora
                 </Link>
-                <button className="px-12 py-6 border border-white/20 text-white rounded-3xl font-black uppercase tracking-widest text-sm hover:bg-white/10 transition-all">
+                <button onClick={() => window.location.href = '/studio-josy'} className="px-12 py-6 border border-white/20 text-white rounded-3xl font-black uppercase tracking-widest text-sm hover:bg-white/10 transition-all">
                   Ver Demonstração
                 </button>
               </div>
@@ -337,12 +353,12 @@ export default function LandingPage() {
           <div className="space-y-6">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Social</h4>
             <div className="flex gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all cursor-pointer">
-                <Star className="w-5 h-5" />
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all cursor-pointer">
-                <Users className="w-5 h-5" />
-              </div>
+              <a href="#" className="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all cursor-pointer">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all cursor-pointer">
+                <Facebook className="w-5 h-5" />
+              </a>
             </div>
           </div>
         </div>

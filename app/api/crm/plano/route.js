@@ -27,13 +27,18 @@ export const GET = withTenant(async (request, { db, tenant }) => {
             where: { tenantId: db.tenantId }
         });
 
+        // Count website gallery images
+        const galleryUrls = tenant?.website?.content?.galleryUrls || tenant?.customization?.galleryUrls || [];
+        const galleryCount = Array.isArray(galleryUrls) ? galleryUrls.length : 0;
+
+
         return apiResponse({
             planId,
             plan,
             usage: {
                 staff: staffCount,
                 services: servicesCount,
-                gallery: 0, // Placeholder
+                gallery: galleryCount,
                 appointments: appointmentsCount,
                 customers: customersCount
             }
