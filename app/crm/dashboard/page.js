@@ -120,7 +120,7 @@ export default function DashboardPage() {
                     { label: 'Faturamento Hoje', value: `R$ ${(stats?.todayRevenue || 0).toFixed(2)}`, sub: 'Realizado', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
                     { label: 'Agendamentos', value: stats?.todayCount || 0, sub: 'Hoje', icon: CalendarIcon, color: 'text-indigo-600', bg: 'bg-indigo-50' },
                     { label: 'Taxa No-Show', value: `${stats?.noShowRate || 0}%`, sub: 'Este mês', icon: AlertCircle, color: 'text-red-600', bg: 'bg-red-50' },
-                    { label: 'Captar Clientes', value: '5', sub: 'Inativos +30d', icon: Users, color: 'text-amber-600', bg: 'bg-amber-50' },
+                    { label: 'Captar Clientes', value: stats?.inactiveCount || 0, sub: 'Inativos +60d', icon: Users, color: 'text-amber-600', bg: 'bg-amber-50' },
                 ].map((stat, i) => (
                     <Card key={i} padding="p-8" className="relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
                         <div className={cn("absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full opacity-10 transition-transform group-hover:scale-110", stat.bg)} />

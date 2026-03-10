@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
     TrendingUp,
     TrendingDown,
@@ -14,53 +14,68 @@ import {
     Scissors,
     Wallet,
     ArrowRight,
-    Plus
+    Plus,
+    Target,
+    Award,
+    FileSpreadsheet,
+    ChevronDown
 } from "lucide-react";
-import { PageHeader } from "@/app/components/ui/forms";
+import { PageHeader, Input, Select } from "@/app/components/ui/forms";
 import { Button, Card } from "@/app/components/ui/core";
 import { Badge } from "@/app/components/ui/forms";
 import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
+import { DateTime } from "luxon";
 
 export default function FinancePage() {
     const [loading, setLoading] = useState(true);
-    const [data, setData] = useState({
-        revenue: 12450.00,
-        expenses: 3200.00,
-        pending: 1200.00,
-        growth: 12.5,
-        transactions: [],
-        commissions: []
-    });
+    const [startDate, setStartDate] = useState(DateTime.now().startOf('month').toISODate());
+    const [endDate, setEndDate] = useState(DateTime.now().endOf('month').toISODate());
+    const [report, setReport] = useState(null);
+
+    const loadReport = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/crm/finance?startDate=${startDate}&endDate=${endDate}`);
+            const data = await res.json();
+            setReport(data);
+        } catch (err) {
+            toast.error("Erro ao carregar relatório financeiro.");
+        } finally {
+            setLoading(false);
+        }
+    }, [startDate, endDate]);
 
     useEffect(() => {
-        // Mocking finance data for showcase
-        setTimeout(() => {
-            setData({
-                revenue: 15780.40,
-                expenses: 4120.00,
-                pending: 850.00,
-                growth: 18.2,
-                transactions: [
-                    { id: 1, type: 'INCOME', category: 'Procedimento', description: 'Cílios Volume Russo - Maria', value: 180.00, date: 'Hoje, 09:30', status: 'PAID' },
-                    { id: 2, type: 'OUTCOME', category: 'Suprimentos', description: 'Compra de Adesivos e Fios', value: 450.00, date: 'Hoje, 08:15', status: 'PAID' },
-                    { id: 3, type: 'INCOME', category: 'Procedimento', description: 'Design de Sobrancelha - Ana', value: 85.00, date: 'Ontem', status: 'PAID' },
-                    { id: 4, type: 'INCOME', category: 'Venda de Produto', description: 'Kit Home Care Pós Procedimento', value: 120.00, date: 'Ontem', status: 'PAID' },
-                    { id: 5, type: 'OUTCOME', category: 'Aluguel', description: 'Parcela Mensal Sala 04', value: 1200.00, date: '01/03', status: 'PAID' },
-                ],
-                commissions: [
-                    { name: 'Amanda Lima', services: 42, total: 4200.00, commission: 2100.00, rate: '50%' },
-                    { name: 'Bruna Silva', services: 28, total: 3100.00, commission: 1240.00, rate: '40%' },
-                    { name: 'Carol Costa', services: 15, total: 1800.00, commission: 630.00, rate: '35%' },
-                ]
-            });
-            setLoading(false);
-        }, 1000);
-    }, []);
+        loadReport();
+    }, [loadReport]);
 
-    const profit = data.revenue - data.expenses;
+    const handleExport = () => {
+        // Implementar export CSV simples
+        const headers = ["Data", "Cliente", "Serviço", "Profissional", "Valor", "Status"];
+        const rows = report.appointments.map(a => [
+            DateTime.fromISO(a.startTime).toFormat('dd/MM/yyyy HH:mm'),
+            a.customer.name,
+            a.service.name,
+            a.staff.name,
+            a.service.price,
+            a.status
+        ]);
 
-    if (loading) return (
+        let csvContent = "data:text/csv;charset=utf-8,"
+            + headers.join(",") + "\n"
+            + rows.map(e => e.join(",")).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `relatorio_financeiro_${startDate}_${endDate}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    if (loading && !report) return (
         <div className="flex flex-col items-center justify-center py-32 space-y-4">
             <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
             <p className="text-zinc-400 font-black uppercase tracking-widest text-xs animate-pulse">Calculando balanço financeiro...</p>
@@ -68,179 +83,212 @@ export default function FinancePage() {
     );
 
     return (
-        <div className="max-w-7xl mx-auto space-y-10">
+        <div className="max-w-7xl mx-auto space-y-10 pb-20">
             <PageHeader
-                title="Centro Financeiro"
-                subtitle="Monitore sua saúde financeira, lucros e comissões da equipe."
+                title="Performance Financeira"
+                subtitle="Análise detalhada de faturamento, ticket médio e produtividade."
                 actions={
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 bg-white p-2 rounded-3xl shadow-sm border border-zinc-100">
+                        <div className="flex items-center gap-2 px-4 border-r border-zinc-100">
+                            <CalendarIcon className="w-4 h-4 text-zinc-400" />
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={e => setStartDate(e.target.value)}
+                                className="bg-transparent border-none text-[10px] font-black uppercase outline-none"
+                            />
+                            <span className="text-zinc-300">/</span>
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={e => setEndDate(e.target.value)}
+                                className="bg-transparent border-none text-[10px] font-black uppercase outline-none"
+                            />
+                        </div>
                         <Button
-                            onClick={() => toast.success("Relatórios financeiros em processamento...")}
-                            variant="outline"
-                            className="gap-2 active:scale-95 transition-all"
+                            onClick={handleExport}
+                            variant="indigo"
+                            className="rounded-2xl h-12 px-6 shadow-lg shadow-indigo-100 text-xs font-black uppercase tracking-widest gap-2"
                         >
-                            <Download className="w-4 h-4 pointer-events-none" />
-                            Relatórios
-                        </Button>
-                        <Button
-                            onClick={() => toast.success("Lançamento de despesa em breve...")}
-                            className="gap-2 bg-green-600 hover:bg-green-700 shadow-green-100 active:scale-95 transition-all"
-                        >
-                            <Plus className="w-4 h-4 pointer-events-none" />
-                            Lançar Despesa
+                            <FileSpreadsheet className="w-4 h-4 pointer-events-none" />
+                            Exportar CSV
                         </Button>
                     </div>
                 }
             />
 
-            {/* Metrics Grid */}
+            {/* Metrics Dashboard */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="relative overflow-hidden group">
-                    <div className="relative z-10">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2">Faturamento Bruto</p>
-                        <div className="flex items-end gap-3">
-                            <h3 className="text-3xl font-black text-zinc-900 leading-none">R$ {data.revenue.toFixed(2)}</h3>
-                            <div className="flex items-center text-green-500 font-black text-xs mb-1">
-                                <TrendingUp className="w-3 h-3 mr-1" />
-                                {data.growth}%
-                            </div>
+                <Card className="relative overflow-hidden group bg-zinc-900 border-none">
+                    <div className="relative z-10 space-y-4">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                            <DollarSign className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Faturamento Período</p>
+                            <h3 className="text-3xl font-black text-white leading-none mt-1">
+                                R$ {report?.stats.totalRevenue.toFixed(2) || "0.00"}
+                            </h3>
                         </div>
                     </div>
-                    <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
-                        <TrendingUp className="w-40 h-40 text-black" />
+                </Card>
+
+                <Card className="relative overflow-hidden group">
+                    <div className="relative z-10 space-y-4">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <Target className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Ticket Médio</p>
+                            <h3 className="text-3xl font-black text-zinc-900 leading-none mt-1">
+                                R$ {report?.stats.averageTicket.toFixed(2) || "0.00"}
+                            </h3>
+                        </div>
                     </div>
                 </Card>
 
                 <Card className="relative overflow-hidden group">
-                    <div className="relative z-10">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2">Despesas Totais</p>
-                        <h3 className="text-3xl font-black text-red-500 leading-none">R$ {data.expenses.toFixed(2)}</h3>
-                    </div>
-                    <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
-                        <TrendingDown className="w-40 h-40 text-black" />
-                    </div>
-                </Card>
-
-                <Card className="relative overflow-hidden group border-indigo-100 bg-indigo-50/20">
-                    <div className="relative z-10">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 mb-2">Lucro Líquido</p>
-                        <h3 className="text-3xl font-black text-indigo-900 leading-none">R$ {profit.toFixed(2)}</h3>
-                    </div>
-                    <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
-                        <PieChart className="w-40 h-40 text-indigo-900" />
+                    <div className="relative z-10 space-y-4">
+                        <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <Award className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Serviço + Vendido</p>
+                            <h3 className="text-xl font-black text-zinc-900 leading-tight mt-1 uppercase tracking-tighter">
+                                {report?.stats.bestService}
+                            </h3>
+                        </div>
                     </div>
                 </Card>
 
                 <Card className="relative overflow-hidden group">
-                    <div className="relative z-10">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2">Contas a Receber</p>
-                        <h3 className="text-3xl font-black text-amber-500 leading-none">R$ {data.pending.toFixed(2)}</h3>
-                    </div>
-                    <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
-                        <Wallet className="w-40 h-40 text-black" />
+                    <div className="relative z-10 space-y-4">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                            <Users className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Top Profissional</p>
+                            <h3 className="text-xl font-black text-zinc-900 leading-tight mt-1 uppercase tracking-tighter">
+                                {report?.stats.topStaff}
+                            </h3>
+                        </div>
                     </div>
                 </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Recent Transactions */}
-                <Card padding="p-0" className="lg:col-span-2 overflow-hidden flex flex-col">
-                    <div className="p-10 border-b border-zinc-50 flex items-center justify-between bg-zinc-50/30">
-                        <div className="flex items-center gap-4">
-                            <div className="w-2 h-8 bg-zinc-900 rounded-full" />
-                            <h2 className="text-xl font-black tracking-tight">Fluxo de Caixa</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                {/* Detailed Table */}
+                <div className="lg:col-span-2 space-y-6">
+                    <div className="flex items-center justify-between px-2">
+                        <h2 className="text-xl font-black text-zinc-900 tracking-tight flex items-center gap-3 italic font-syne">
+                            <TrendingUp className="w-5 h-5 text-indigo-600" /> Fluxo de Atendimentos
+                        </h2>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                            {report?.stats.appointmentCount} registros
+                        </span>
+                    </div>
+
+                    <Card padding="p-0 overflow-hidden shadow-2xl shadow-zinc-100 border-zinc-100">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead className="bg-zinc-50/50">
+                                    <tr className="border-b border-zinc-100">
+                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">Data</th>
+                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">Cliente</th>
+                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">Serviço / Profissional</th>
+                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-zinc-50">
+                                    {report?.appointments.map((app) => (
+                                        <tr key={app.id} className="hover:bg-zinc-50/30 transition-all group">
+                                            <td className="px-8 py-6">
+                                                <div className="text-xs font-black text-zinc-900 italic">
+                                                    {DateTime.fromISO(app.startTime).toFormat('dd/MM/yyyy')}
+                                                </div>
+                                                <div className="text-[10px] font-bold text-zinc-400 mt-0.5">
+                                                    {DateTime.fromISO(app.startTime).toFormat('HH:mm')}
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="text-sm font-black text-zinc-900 uppercase tracking-tight">{app.customer.name}</div>
+                                                <div className="text-[10px] font-bold text-zinc-400">{app.customer.phone}</div>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="text-xs font-bold text-zinc-600 ">{app.service.name}</div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="w-1 h-1 rounded-full bg-indigo-400" />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{app.staff.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6 text-right">
+                                                <div className="text-lg font-black text-zinc-900 tracking-tighter italic">R$ {parseFloat(app.service.price).toFixed(2)}</div>
+                                                <Badge variant={app.status === 'DONE' ? 'success' : 'indigo'} className="text-[9px] px-1.5 py-0 mt-1">{app.status}</Badge>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {report?.appointments.length === 0 && (
+                                        <tr>
+                                            <td colSpan="4" className="px-8 py-20 text-center">
+                                                <p className="text-zinc-400 font-bold italic">Nenhum faturamento registrado neste período.</p>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
-                        <Button
-                            onClick={() => toast.success("Extrato completo disponível em breve...")}
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs font-black uppercase tracking-widest text-indigo-600 active:scale-95 transition-all"
-                        >
-                            Ver Extrato Completo
-                        </Button>
-                    </div>
+                    </Card>
+                </div>
 
-                    <div className="flex-1 divide-y divide-zinc-50">
-                        {data.transactions.map(t => (
-                            <div key={t.id} className="p-8 flex items-center justify-between hover:bg-zinc-50/50 transition-all">
-                                <div className="flex items-center gap-6">
-                                    <div className={cn(
-                                        "w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm",
-                                        t.type === 'INCOME' ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
-                                    )}>
-                                        {t.type === 'INCOME' ? <ArrowUpRight className="w-6 h-6 pointer-events-none" /> : <ArrowDownRight className="w-6 h-6 pointer-events-none" />}
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-black text-zinc-900 uppercase tracking-tight mb-1">{t.description}</p>
-                                        <div className="flex items-center gap-3">
-                                            <Badge variant="default" className="bg-zinc-100 text-zinc-500 border-none px-2 py-0">{t.category}</Badge>
-                                            <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">{t.date}</span>
+                {/* Categories Breakdown */}
+                <div className="space-y-6">
+                    <h2 className="text-xl font-black text-zinc-900 tracking-tight flex items-center gap-3 px-2 italic font-syne">
+                        <PieChart className="w-5 h-5 text-indigo-600" /> Por Categoria
+                    </h2>
+
+                    <Card padding="p-8">
+                        <div className="space-y-8">
+                            {report?.categoryData.map((cat, i) => {
+                                const percentage = (cat.value / report.stats.totalRevenue) * 100;
+                                return (
+                                    <div key={i} className="space-y-2">
+                                        <div className="flex justify-between items-end">
+                                            <span className="text-sm font-black text-zinc-900 uppercase tracking-tight">{cat.name}</span>
+                                            <span className="text-xs font-bold text-zinc-400 italic">R$ {cat.value.toFixed(2)}</span>
+                                        </div>
+                                        <div className="h-2 w-full bg-zinc-50 rounded-full overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${percentage}%` }}
+                                                className="h-full bg-indigo-600 rounded-full"
+                                            />
+                                        </div>
+                                        <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest text-right">
+                                            {percentage.toFixed(1)}% do total
                                         </div>
                                     </div>
-                                </div>
-                                <div className="text-right">
-                                    <p className={cn(
-                                        "text-xl font-black tracking-tighter leading-none mb-1",
-                                        t.type === 'INCOME' ? "text-zinc-900" : "text-red-500"
-                                    )}>
-                                        {t.type === 'INCOME' ? '+' : '-'} R$ {t.value.toFixed(2)}
-                                    </p>
-                                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-green-500">Confirmado</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </Card>
+                                );
+                            })}
 
-                {/* Team Commissions */}
-                <Card padding="p-0" className="overflow-hidden flex flex-col border-indigo-100 shadow-xl shadow-indigo-100/10">
-                    <div className="p-10 border-b border-zinc-100 flex items-center gap-4 bg-indigo-50/30">
-                        <div className="w-2 h-8 bg-indigo-600 rounded-full" />
-                        <h2 className="text-xl font-black tracking-tight">Comissões</h2>
-                    </div>
-
-                    <div className="p-8 space-y-6 flex-1">
-                        {data.commissions.map((comm, i) => (
-                            <div key={i} className="group p-6 bg-white border border-zinc-100 rounded-3xl hover:border-indigo-600 transition-all shadow-sm">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center text-sm font-black text-zinc-400 border border-zinc-100">
-                                            {comm.name[0]}
-                                        </div>
-                                        <div>
-                                            <h4 className="font-black text-zinc-900 uppercase tracking-tight leading-none mb-1">{comm.name}</h4>
-                                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{comm.services} atendimentos</p>
-                                        </div>
-                                    </div>
-                                    <Badge variant="indigo" className="py-0 px-2">{comm.rate}</Badge>
-                                </div>
-
-                                <div className="flex items-center justify-between pt-4 border-t border-zinc-50">
-                                    <div>
-                                        <p className="text-[9px] font-black uppercase text-zinc-300 tracking-widest mb-1">A Repassar</p>
-                                        <p className="text-xl font-black text-zinc-900 tracking-tighter">R$ {comm.commission.toFixed(2)}</p>
-                                    </div>
-                                    <button
-                                        onClick={() => toast.success(`Pagamento de ${comm.name} em processamento...`)}
-                                        className="p-3 bg-zinc-50 text-zinc-400 rounded-xl hover:bg-indigo-600 hover:text-white transition-all active:scale-95"
-                                    >
-                                        <ArrowRight className="w-5 h-5 pointer-events-none" />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-
-                        <div className="pt-6">
-                            <Button
-                                onClick={() => toast.success("Configuração de comissões em breve...")}
-                                variant="secondary"
-                                className="w-full py-4 text-xs font-black uppercase tracking-widest border-2 border-dashed border-zinc-200 bg-transparent hover:bg-zinc-50 hover:border-zinc-300 active:scale-95 transition-all"
-                            >
-                                Configurar Regras de Divisão
-                            </Button>
+                            {report?.categoryData.length === 0 && (
+                                <p className="text-zinc-400 text-sm italic text-center py-10">Sem dados de categorias.</p>
+                            )}
                         </div>
-                    </div>
-                </Card>
+                    </Card>
+
+                    <Card padding="p-8" className="bg-indigo-50 border-indigo-100 flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-indigo-600 shrink-0 shadow-sm border border-indigo-100">
+                            <TrendingUp className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h4 className="text-xs font-black text-indigo-900 uppercase tracking-widest">Dica Premium</h4>
+                            <p className="text-[10px] text-indigo-600 font-medium mt-1 leading-relaxed">
+                                O serviço <span className="font-bold underline">{report?.stats.bestService}</span> é o seu carro-chefe.
+                                Considere criar um pacote promocional com ele para aumentar o ticket médio.
+                            </p>
+                        </div>
+                    </Card>
+                </div>
             </div>
         </div>
     );

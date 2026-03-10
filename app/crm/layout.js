@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Calendar,
     Users,
@@ -15,17 +15,19 @@ import {
     Plus,
     BarChart3,
     Clock,
-    ClipboardList
+    ClipboardList,
+    Lock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/app/components/ui/core";
+import { PLANS, hasFeature } from "@/lib/plans";
 
 const navSections = [
     {
         title: "Operação",
         items: [
             { href: "/crm/dashboard", label: "Dashboard", icon: BarChart3 },
-            { href: "/crm/checkin", label: "Balcão (Check-in)", icon: ClipboardList },
+            { href: "/crm/checkin", label: "Balcão (Check-in)", icon: ClipboardList, feature: "checkin_pro" },
             { href: "/crm/calendar", label: "Calendário", icon: Calendar },
             { href: "/crm/schedule", label: "Grade de Trabalho", icon: Clock },
             { href: "/crm/customers", label: "Clientes", icon: Users },
@@ -36,7 +38,7 @@ const navSections = [
     {
         title: "Gestão",
         items: [
-            { href: "/crm/finance", label: "Financeiro", icon: BarChart3 },
+            { href: "/crm/finance", label: "Financeiro", icon: BarChart3, feature: "finance_reports" },
         ],
     },
     {
@@ -50,7 +52,15 @@ const navSections = [
 
 export default function CRMLayout({ children }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [tenant, setTenant] = useState(null);
     const pathname = usePathname();
+
+    useEffect(() => {
+        fetch('/api/crm/settings')
+            .then(res => res.json())
+            .then(data => setTenant(data))
+            .catch(() => { });
+    }, []);
 
     const handleLogout = async () => {
         try {
@@ -61,13 +71,16 @@ export default function CRMLayout({ children }) {
         }
     };
 
+    const planId = tenant?.plan || "start";
+    const plan = PLANS[planId];
+
     return (
         <div className="min-h-screen bg-[#FDFDFF]">
             {/* Mobile Header */}
             <header className="lg:hidden fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-100 h-20 px-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100">
-                        <Calendar className="w-5 h-5 pointer-events-none" />
+                        <Calendar className="w-5 h-5" />
                     </div>
                     <h1 className="text-xl font-black tracking-tight">
                         Agenda <span className="text-indigo-600">Pro</span>
@@ -75,19 +88,11 @@ export default function CRMLayout({ children }) {
                 </div>
                 <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="p-3 bg-zinc-50 rounded-2xl text-zinc-500 border border-zinc-100 active:scale-95 transition-all"
+                    className="p-3 bg-zinc-50 rounded-2xl text-zinc-500 border border-zinc-100"
                 >
-                    {isMenuOpen ? <X className="w-6 h-6 pointer-events-none" /> : <Menu className="w-6 h-6 pointer-events-none" />}
+                    {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                 </button>
             </header>
-
-            {/* Sidebar Overlay */}
-            {isMenuOpen && (
-                <div
-                    className="fixed inset-0 z-40 bg-zinc-900/40 backdrop-blur-sm lg:hidden transition-all duration-300"
-                    onClick={() => setIsMenuOpen(false)}
-                />
-            )}
 
             {/* Sidebar */}
             <aside className={cn(
@@ -96,14 +101,14 @@ export default function CRMLayout({ children }) {
             )}>
                 <div className="p-8 mb-4">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-indigo-600 rounded-[1.25rem] flex items-center justify-center text-white shadow-xl shadow-indigo-100">
-                            <Calendar className="w-6 h-6 pointer-events-none" />
+                        <div className="w-12 h-12 bg-indigo-600 rounded-[1.25rem] flex items-center justify-center text-white shadow-xl shadow-indigo-100 font-black">
+                            AP
                         </div>
                         <div>
-                            <h1 className="text-xl font-black tracking-tight leading-none mb-1">
-                                Agenda <span className="text-indigo-600">Pro</span>
+                            <h1 className="text-xl font-black tracking-tight leading-none mb-1 text-zinc-900">
+                                Agenda<span className="text-indigo-600">Pro</span>
                             </h1>
-                            <p className="text-[10px] uppercase font-black tracking-[0.2em] text-zinc-300">Painel Admin</p>
+                            <p className="text-[10px] uppercase font-black tracking-[0.2em] text-zinc-300">Admin Panel</p>
                         </div>
                     </div>
                 </div>
@@ -117,30 +122,32 @@ export default function CRMLayout({ children }) {
                                     const isActive = item.href === '/crm/dashboard'
                                         ? pathname === item.href
                                         : pathname.startsWith(item.href);
+
+                                    const isLocked = item.feature && !hasFeature(planId, item.feature);
                                     const Icon = item.icon;
 
                                     return (
                                         <li key={item.href}>
                                             <Link
-                                                href={item.href}
-                                                onClick={() => setIsMenuOpen(false)}
+                                                href={isLocked ? "#" : item.href}
+                                                onClick={() => !isLocked && setIsMenuOpen(false)}
                                                 className={cn(
-                                                    "group flex items-center gap-4 px-4 py-4 text-sm font-bold rounded-2xl transition-all relative overflow-hidden",
+                                                    "group flex items-center justify-between px-4 py-4 text-sm font-bold rounded-2xl transition-all relative overflow-hidden",
                                                     isActive
                                                         ? "bg-indigo-50 text-indigo-700 shadow-sm"
-                                                        : item.disabled
-                                                            ? "text-zinc-300 cursor-not-allowed grayscale pointer-events-none"
+                                                        : isLocked
+                                                            ? "text-zinc-300 cursor-not-allowed"
                                                             : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50"
                                                 )}
                                             >
-                                                {isActive && (
-                                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600 rounded-full" />
-                                                )}
-                                                <Icon className={cn(
-                                                    "w-5 h-5 transition-transform group-hover:scale-110 pointer-events-none",
-                                                    isActive ? "text-indigo-600" : "text-zinc-400"
-                                                )} />
-                                                {item.label}
+                                                <div className="flex items-center gap-4">
+                                                    <Icon className={cn(
+                                                        "w-5 h-5 transition-transform group-hover:scale-110",
+                                                        isActive ? "text-indigo-600" : "text-zinc-400"
+                                                    )} />
+                                                    {item.label}
+                                                </div>
+                                                {isLocked && <Lock className="w-3 h-3 text-zinc-200" />}
                                             </Link>
                                         </li>
                                     )
@@ -155,14 +162,13 @@ export default function CRMLayout({ children }) {
                         onClick={handleLogout}
                         className="w-full transition-all flex items-center gap-4 px-6 py-4 text-sm font-black text-red-500 hover:bg-red-50 rounded-2xl group active:scale-95"
                     >
-                        <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1 pointer-events-none" />
-                        Sair do Sistema
+                        <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+                        Sair
                     </button>
                 </div>
             </aside>
 
-
-            {/* Desktop Main Header / Topbar */}
+            {/* Desktop Content */}
             <div className="lg:ml-72 flex flex-col min-h-screen">
                 <header className="hidden lg:flex sticky top-0 z-30 h-24 bg-white/80 backdrop-blur-md border-b border-zinc-100 px-12 items-center justify-between">
                     <div className="flex-1 max-w-xl">
@@ -171,7 +177,7 @@ export default function CRMLayout({ children }) {
                             <input
                                 type="text"
                                 placeholder="Buscar clientes, serviços ou horários..."
-                                className="w-full pl-12 pr-6 py-4 bg-zinc-50 border border-zinc-100 rounded-[1.25rem] text-sm font-medium outline-none focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 transition-all transition-all"
+                                className="w-full pl-12 pr-6 py-4 bg-zinc-50 border border-zinc-100 rounded-[1.25rem] text-sm font-medium outline-none focus:bg-white focus:border-indigo-600 transition-all"
                             />
                         </div>
                     </div>
@@ -179,10 +185,9 @@ export default function CRMLayout({ children }) {
                     <div className="flex items-center gap-6">
                         <Button
                             onClick={() => window.location.href = '/crm/calendar'}
-                            size="md"
                             className="gap-2 active:scale-95 transition-all"
                         >
-                            <Plus className="w-4 h-4 pointer-events-none" />
+                            <Plus className="w-4 h-4" />
                             Novo Agendamento
                         </Button>
 
@@ -190,17 +195,19 @@ export default function CRMLayout({ children }) {
 
                         <div className="flex items-center gap-3">
                             <div className="text-right">
-                                <p className="text-sm font-black text-zinc-900 leading-none mb-1">Studio Josy Silva</p>
-                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Plano Pro</p>
+                                <p className="text-sm font-black text-zinc-900 leading-none mb-1">{tenant?.name || "Carregando..."}</p>
+                                <p className={cn(
+                                    "text-[10px] font-black uppercase tracking-widest",
+                                    planId === 'enterprise' ? 'text-indigo-600' : 'text-zinc-400'
+                                )}>Plano {plan?.name || "..."}</p>
                             </div>
                             <div className="w-12 h-12 bg-zinc-100 rounded-2xl flex items-center justify-center border-2 border-white shadow-sm font-black text-zinc-400">
-                                JS
+                                {tenant?.name?.[0] || "?"}
                             </div>
                         </div>
                     </div>
                 </header>
 
-                {/* Content Area */}
                 <main className="flex-1 p-6 lg:p-12 pt-28 lg:pt-12">
                     {children}
                 </main>

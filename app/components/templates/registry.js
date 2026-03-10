@@ -3,6 +3,8 @@ import BeautySoft from "./layouts/BeautySoft";
 import PremiumDark from "./layouts/PremiumDark";
 import CleanClinic from "./layouts/CleanClinic";
 import ModernStudio from "./layouts/ModernStudio";
+import ManicurePastel from "./layouts/ManicurePastel";
+import BarberClean from "./layouts/BarberClean";
 import { SITE_TEMPLATES } from "@/lib/siteTemplates";
 
 /**
@@ -13,6 +15,8 @@ export const TECHNICAL_LAYOUT_COMPONENTS = {
     "premium-dark": PremiumDark,
     "clean-clinic": CleanClinic,
     "modern-studio": ModernStudio,
+    "manicure-pastel": ManicurePastel,
+    "barber-clean": BarberClean,
 };
 
 /**

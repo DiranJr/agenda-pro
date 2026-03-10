@@ -1,61 +1,55 @@
-# 🚀 Agenda Pro - Sistema de Templates Flexíveis
+# 🚀 Agenda Pro - SaaS de Agendamento & Gestão
 
-Este projeto utiliza uma arquitetura de templates desacoplada, permitindo que múltiplos estilos visuais (comerciais) compartilhem layouts técnicos robustos.
+Sistema multi-tenant premium para profissionais autônomos e estúdios de beleza.
 
 ## 🛠️ Como Rodar Localmente
 
-Certifique-se de estar na porta correta conforme configurado no ambiente:
-
 ```bash
+npm install
+npx prisma db push
+npm run prisma:seed
 npm run dev -- -p 3016
 ```
+Porta padrão: `3016`
+Credenciais Seed: `admin@agendapro.com / abracadabra`
 
-Após iniciar, o sistema estará disponível em `http://localhost:3016`.
+## 🌐 Módulos Principais
 
-## 🌐 URLs de Acesso
+### 1. Landing Page Institucional
+Página de entrada para venda do SaaS: [http://localhost:3016/](http://localhost:3016/)
 
-### 1. Área Pública (Sites dos Clientes)
-Os sites são acessados pelo slug do cliente:
-- [Studio Josy (Efeito Soft)](http://localhost:3016/studio-josy)
-- [CrossFit Action (Modern Studio)](http://localhost:3016/crossfit-action)
-- [Odonto Premium (Clean Clinic)](http://localhost:3016/odonto-premium)
-- [Vintage Gold Barber (Premium Dark)](http://localhost:3016/vintage-barber)
+### 2. Painel Administrativo (CRM)
+Gestão completa do negócio:
+- **Dashboard BI:** KPIs em tempo real, faturamento 7 dias e próximos agendamentos.
+- **Balcão (Check-in):** Agendamento rápido para clientes presenciais (high-performance).
+- **Recuperação de Clientes:** Filtros de inatividade (30/60/90 dias) e botão direto de WhatsApp.
+- **Finanças Pro:** Relatórios por período, faturamento por categoria/staff e exportação CSV.
+- **Editor de Site:** Configuração visual do mini-site público.
 
-### 2. Gestão do Site (CRM)
-- **Configuração Visual:** `http://localhost:3016/crm/website`
-  - Fluxo em passos: Estilo -> Conteúdo -> Mídias -> Publicar.
-- **Preview Comparativo:** `http://localhost:3016/crm/website/preview-all`
-  - Ferramenta para desenvolvedores compararem como os dados aparecem em todos os 4 layouts simultaneamente.
+### 3. Mini-Sites Públicos
+Sites de agendamento gerados dinamicamente:
+- **Exemplo Josy Silva:** [http://localhost:3016/studio-josy](http://localhost:3016/studio-josy)
+
+## 🎨 Galeria de Templates (Layouts)
+O sistema conta agora com 6 layouts técnicos:
+1. **Manicure Pastel (Novo):** Soft, elegante, focado em estética delicada.
+2. **Barber Clean (Novo):** Premium Dark, industrial, vibes vintage.
+3. **Beauty Soft:** Clássico feminino.
+4. **Premium Dark:** Luxo e sofisticação.
+5. **Clean Clinic:** Profissional e direto.
+6. **Modern Studio:** Vibrante e enérgico.
 
 ## 👤 Como Cadastrar Novos Clientes (Tenants)
+1. **Criação:** Novos tenants podem ser criados via API ou via script de seed.
+2. **Setup:** Ao logar, o usuário configura seus **Serviços** e **Profissionais**.
+3. **Site:** No menu "Meu Site", o usuário escolhe um dos templates comerciais e publica seu link.
+4. **Planos:** O sistema suporta Trial (Start), Pro e Enterprise, com bloqueio automático de funcionalidades via Feature Gating.
 
-### Passo 1: Criação no Banco de Dados
-Para testes rápidos, você pode usar o script de geração de dados fictícios:
-```bash
-node tmp/seed-test-layouts.js
-```
-
-Para produção, o novo cliente deve ser inserido na tabela `Tenant` via Prisma ou painel administrativo (em desenvolvimento).
-
-### Passo 2: Configuração de Conteúdo
-Ao configurar o site no CRM, respeite os limites visuais para garantir a melhor experiência:
-- **Nome da Marca:** Máx 30 caracteres.
-- **Título (Headline):** Máx 60 caracteres.
-- **Subtítulo:** Máx 140 caracteres.
-- **Galeria:** Máx 8 fotos.
-
-### Passo 3: Escolha do Template
-Atualmente existem 4 layouts base que podem ser personalizados com cores infinitas:
-1. **Beauty Soft:** Ideal para estética e cílios.
-2. **Premium Dark:** Focado em luxo e sofisticação (Barbearias/Studios).
-3. **Clean Clinic:** Para médicos, dentistas e clínicas.
-4. **Modern Studio:** Enérgico e vibrante (Academias/Crossfit).
-
-## 🔍 Validação de Dados Legados
-Se precisar garantir que todos os clientes antigos estão compatíveis com os novos limites:
-```bash
-node tmp/validate-tenants.js
-```
+## ⚙️ Stack Tecnológica
+- **Next.js 16 (App Router)** & **React 19**
+- **Prisma 6** com **SQLite**
+- **Tailwind CSS 4** & **Framer Motion 12**
+- **Luxon 3** (Controle rigoroso de Datas/Timezones)
 
 ---
-*Desenvolvido com foco em escalabilidade e performance.*
+*Foco total em UX e conversão para o profissional autônomo.*

@@ -52,3 +52,37 @@ export function Input({ label, error, className = "", ...props }) {
         </div>
     );
 }
+
+export function Select({ label, options = [], value, onChange, className = "", ...props }) {
+    return (
+        <div className="space-y-2 w-full">
+            {label && (
+                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1 block">
+                    {label}
+                </label>
+            )}
+            <div className="relative group">
+                <select
+                    className={cn(
+                        "w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl font-bold outline-none transition-all focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 appearance-none cursor-pointer text-zinc-900",
+                        className
+                    )}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    {...props}
+                >
+                    {options.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    );
+}

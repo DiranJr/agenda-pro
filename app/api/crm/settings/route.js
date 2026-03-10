@@ -10,6 +10,15 @@ const settingsSchema = z.object({
     timezone: z.string().default('America/Sao_Paulo'),
 });
 
+export async function GET(request) {
+    const { db, error } = await getRequestContext({ request });
+    if (error || !db?.tenantId) {
+        return NextResponse.json({ error: { code: "UNAUTHORIZED", message: "Tenant nao resolvido" } }, { status: 401 });
+    }
+    const tenant = await prisma.tenant.findUnique({ where: { id: db.tenantId } });
+    return NextResponse.json(tenant);
+}
+
 export async function PATCH(request) {
     const { db, error } = await getRequestContext({ request });
     if (error || !db?.tenantId) {

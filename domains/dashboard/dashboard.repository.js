@@ -90,12 +90,24 @@ export class DashboardRepository {
 
         const todayRevenue = todayStats.reduce((acc, app) => acc + (app.status !== 'CANCELED' ? Number(app.service?.price || 0) : 0), 0);
 
+        // 5. Clientes Inativos (+60 dias)
+        const sixtyDaysAgo = now.minus({ days: 60 }).toUTC().toJSDate();
+        const inactiveCount = await prisma.customer.count({
+            where: {
+                tenantId: this.tenantId,
+                appointments: {
+                    every: { startTime: { lt: sixtyDaysAgo } }
+                }
+            }
+        });
+
         return {
             todayRevenue,
             todayCount: todayStats.length,
             noShowRate,
             nextAppointment,
-            chartData
+            chartData,
+            inactiveCount
         };
     }
 }
